@@ -1,6 +1,8 @@
 package server;
 
 import java.rmi.server.UnicastRemoteObject;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -57,18 +59,43 @@ class Server implements Peer {
         this.mc_port = mc_port;
         this.mdb_port = mdb_port;
         this.mdr_port = mdr_port;
+
+        this.mc.joinGroup(this.mc_group);
+        this.mdb.joinGroup(this.mdb_group);
+        this.mdr.joinGroup(this.mdr_group);
+
+        receive();
     }
 
-    public void putchunk(int version, int sender_id, int file_id, int chunk_num, int replication, byte[] bytes) {
-
-        sendPacket = new DatagramPacket(bytes, bytes.length, this.mdb_group, this.md
-        // this.mdb_port);
+    public void putchunk(int version, int sender_id, int file_id, int chunk_num, int replication, byte[] bytes) throws IOException {
+        sendPacket = new DatagramPacket(bytes, bytes.length, this.mdb_group, this.mdb_port);
+        this.mdb.send(sendPacket);
     }
 
-    public void receive() {
-        // mc.joinGroup(mc_group);
-        // mdb.joinGroup(mdb_port);
-        // mdr.joinGroup(mdr_port);
+    public void receive() throws IOException {
+   
+        // Dentro do thread
+
+        Runnable mdbTask = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Listening...");
+                byte[] buf = new byte[CHUNK_SIZE];
+                DatagramPacket recv = new DatagramPacket(buf, buf.length);
+                try {
+                    System.out.println("Before Receive");
+                    mdb.receive(recv);
+                    System.out.println("After receive");
+                    System.out.println(new String(buf));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        Executor e = Executors.newSingleThreadExecutor();
+        e.execute(mdbTask);
+
     }
 
     public void close() {
@@ -95,9 +122,9 @@ class Server implements Peer {
             byte[] bytes = new byte[CHUNK_SIZE];
 
             while ((readBytes = inFile.read(bytes, 0, CHUNK_SIZE)) != -1) {
-                System.out.println("A");
                 System.out.println(new String(bytes));
-
+                System.out.println("Put Chunk");
+                putchunk(1, 0, 0, readBytes, replication, bytes);
             }
 
             inFile.close();

@@ -7,7 +7,12 @@ import server.Peer;
 
 public class Client {
 
-    private Client() {}
+    public Client() {
+    }
+
+    public void backup(String peer_ap, String file_name, int replication){
+
+    }
 
     public static void main(String[] args) {
         try {
