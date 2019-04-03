@@ -19,13 +19,13 @@ class TestApp {
         this.stub = (Peer) registry.lookup(peer_ap);
     }
 
-
     public static void main(String[] args) throws RemoteException, NotBoundException {
 
-        String peer_ap = args[0];
+        int peer_ap = Integer.parseInt(args[0]);
+        String peer_ap_str = args[0];
         String sub_protocol = new String(args[1]).toUpperCase();
 
-        TestApp testapp = new TestApp(peer_ap);
+        TestApp testapp = new TestApp(peer_ap_str);
 
         switch(sub_protocol){
             case "BACKUP":
@@ -36,9 +36,9 @@ class TestApp {
         }
     }
 
-    private void backup(String file_name, int replication) {
+    private void backup(String filename, int replication) {
         try {
-            String response = this.stub.backup(0, "", 0);
+            String response = this.stub.backup(filename, replication);
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

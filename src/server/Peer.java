@@ -5,7 +5,7 @@ import java.rmi.RemoteException;
 
 public interface Peer extends Remote{
 
-    public String backup(int peer_ap, String filename, int replication) throws RemoteException;
+    public String backup(String filename, int replication) throws RemoteException;
     public String restore(int peer_ap, String filename) throws RemoteException;
     public String delete(int peer_ap, String filename) throws RemoteException;
     public String reclaim(int peer_ap, int arg) throws RemoteException;

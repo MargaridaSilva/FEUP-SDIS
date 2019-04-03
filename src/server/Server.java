@@ -37,6 +37,8 @@ class Server implements Peer {
 
     private static int CHUNK_SIZE = 64 * 1000;
 
+    private final String FILES_DIR = "../files/";
+
     // DatagramPacket hi = new DatagramPacket(msg.getBytes(), msg.length(),
     // group, 6789);
     // s.send(hi);
@@ -108,15 +110,14 @@ class Server implements Peer {
 
     }
 
-    @Override
-    public String backup(int peer_ap, String filename, int replication) throws RemoteException {
-
-        // Open file
+    @Override   
+    public String backup(String filename, int replication) throws RemoteException {
+        
         // Dividir chunks
         // ciclo com putchunk
 
         try {
-            InputStream inFile = new FileInputStream("../files/file.txt");
+            InputStream inFile = new FileInputStream(FILES_DIR + filename);
 
             int readBytes = 0;
             byte[] bytes = new byte[CHUNK_SIZE];
@@ -133,7 +134,7 @@ class Server implements Peer {
             e.printStackTrace();
         }
 
-        return "Teste";
+        return "OK";
     }
 
     @Override
