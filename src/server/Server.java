@@ -36,17 +36,11 @@ class Server implements Peer {
     private DatagramPacket receivePacket;
 
     private static int CHUNK_SIZE = 64 * 1000;
+    private static int UDP_MAX = 64 * 1024 - 20 - 8;
 
     private final String FILES_DIR = "../files/";
 
-    // DatagramPacket hi = new DatagramPacket(msg.getBytes(), msg.length(),
-    // group, 6789);
-    // s.send(hi);
-    // // get their responses!
-    // byte[] buf = new byte[1000];
-    // DatagramPacket recv = new DatagramPacket(buf, buf.length);
-    // s.receive(recv);
-
+    
     Server(String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port)
             throws IOException {
 
@@ -69,26 +63,39 @@ class Server implements Peer {
         receive();
     }
 
+
+    public byte[] createHeaderPutChunk(String version, int sender_id, int file_id, int chunk_num, int replication){
+        String message = "PUTCHUNK" + " " + version + " " + sender_id + " " + " " + file_id + " " + chunk_num + " " + replication + "\r\n\r\n";
+        return message.getBytes();
+    }
+
+    public void readMessage(){
+    }
+
+
     public void putchunk(int version, int sender_id, int file_id, int chunk_num, int replication, byte[] bytes) throws IOException {
+
         sendPacket = new DatagramPacket(bytes, bytes.length, this.mdb_group, this.mdb_port);
         this.mdb.send(sendPacket);
     }
 
     public void receive() throws IOException {
-   
-        // Dentro do thread
 
         Runnable mdbTask = new Runnable() {
             @Override
             public void run() {
                 System.out.println("Listening...");
-                byte[] buf = new byte[CHUNK_SIZE];
+                byte[] buf = new byte[UDP_MAX];
                 DatagramPacket recv = new DatagramPacket(buf, buf.length);
+
                 try {
                     System.out.println("Before Receive");
+                    readMessage();
                     mdb.receive(recv);
-                    System.out.println("After receive");
+
+                    System.out.println("After Receive");
                     System.out.println(new String(buf));
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

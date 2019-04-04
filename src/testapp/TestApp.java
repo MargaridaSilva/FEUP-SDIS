@@ -16,6 +16,7 @@ class TestApp {
     public TestApp(String peer_ap) throws RemoteException, NotBoundException {
         this.peer_ap = peer_ap;
         this.registry = LocateRegistry.getRegistry(null);
+        System.out.println(peer_ap);
         this.stub = (Peer) registry.lookup(peer_ap);
     }
 
