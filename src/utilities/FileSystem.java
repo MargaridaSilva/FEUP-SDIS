@@ -44,11 +44,14 @@ public class FileSystem {
     }
 
     public void createFileDir(String file_id) {
+
         String new_path = this.backup_path + file_id;
-        try {
-            Files.createDirectories(Paths.get(new_path));
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(Files.notExists(Paths.get(new_path))){
+            try {
+                Files.createDirectories(Paths.get(new_path));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
     }
@@ -62,6 +65,8 @@ public class FileSystem {
     }
 
     public void createChunk(String file_id, int chunk_no, byte[] bytes, int size) {
+        createFileDir(file_id);
+
         FileOutputStream fos;
         try {
             String filepath = this.backup_path + file_id + "/" + chunk_no;

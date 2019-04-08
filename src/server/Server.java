@@ -60,25 +60,28 @@ class Server implements Peer {
         this.mc.joinGroup(this.mc_group);
         this.mdb.joinGroup(this.mdb_group);
         this.mdr.joinGroup(this.mdr_group);
-
-                
-        receive();
     }
 
 
-    public byte[] createHeaderPutChunk(String version, int sender_id, int file_id, int chunk_num, int replication){
-        String message = "PUTCHUNK" + " " + version + " " + sender_id + " " + " " + file_id + " " + chunk_num + " " + replication + "\r\n\r\n";
+    public byte[] createHeaderPutChunk(String version, int sender_id, String file_id, int chunk_num, int replication, byte[] bytes){
+    	String message = "PUTCHUNK" + " " + version + " " + sender_id + " " + " " + file_id + " " + chunk_num + " " + replication + "\r\n\r\n";
         return message.getBytes();
     }
 
-    public void readMessage(){
+    public void putchunk(String version, int sender_id, String file_id, int chunk_num, int replication, byte[] bytes,
+            int readBytes) throws IOException {
+    	Message message = new Message(version, sender_id, file_id, chunk_num, replication, bytes, readBytes);
+        DatagramPacket packet = new DatagramPacket(message.buf, message.buf_len, this.mdb_group, this.mdb_port);
+        this.mdb.send(packet);
     }
 
 
-    public void putchunk(int version, int sender_id, String file_id, int chunk_num, int replication, byte[] bytes) throws IOException {
-
-        sendPacket = new DatagramPacket(bytes, bytes.length, this.mdb_group, this.mdb_port);
-        this.mdb.send(sendPacket);
+    private void processMessage(Message message) {
+        switch(message.type){
+            case "PUTCHUNK": 
+                this.fs.createChunk(message.file_id, message.chunk_num, message.body, message.body_len);
+                break;
+        }
     }
 
     public void receive() throws IOException {
@@ -95,16 +98,18 @@ class Server implements Peer {
 
                 try {
                     System.out.println("Before Receive");
-                    readMessage();
                     mdb.receive(recv);
 
                     System.out.println("After Receive");
-                    System.out.println(new String(buf));
+                    Message message = new Message(recv);
+
+                    processMessage(message);
 
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
+
         };
 
         Executor e = Executors.newSingleThreadExecutor();
@@ -135,11 +140,10 @@ class Server implements Peer {
             int i = 0;
 
             while ((readBytes = in_file.read(bytes, 0, Utilities.CHUNK_SIZE)) != -1) {
-
-                System.out.println(new String(bytes));
                 System.out.println("Put Chunk");
 
-                putchunk(1, this.server_id, file_id, readBytes, replication, bytes);
+                putchunk("1.0", this.server_id, file_id, i, replication, bytes, readBytes);
+
                 i++;
             }
 
@@ -203,11 +207,14 @@ class Server implements Peer {
 
         try {
             Server server = new Server(server_id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port);
+            server.receive();
 
             Peer stub = (Peer) UnicastRemoteObject.exportObject(server, 0);
 
             Registry registry = LocateRegistry.createRegistry(1099);
             registry.bind(service_ap, stub);
+
+           
 
         } catch (Exception e) {
         }

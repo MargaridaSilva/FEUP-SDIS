@@ -43,9 +43,16 @@ public class Utilities {
         return bytesToHex(hash);
     }
 
-    public static void forEachChunkInFile( ){
-
+    public static int indexOf(byte[] array, byte valueToFind) {
+        if (array == null) {
+            return -1;
+        }
+        for (int i = 0; i < array.length; i++) {
+            if (valueToFind == array[i]) {
+                return i;
+            }
+        }
+        return -1;
     }
-
 
 }
