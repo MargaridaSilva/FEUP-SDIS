@@ -64,8 +64,8 @@ class Server implements Peer {
     }
 
 
-    public byte[] createHeaderPutChunk(String version, int sender_id, int file_id, int chunk_num, int replication){
-        String message = "PUTCHUNK" + " " + version + " " + sender_id + " " + " " + file_id + " " + chunk_num + " " + replication + "\r\n\r\n";
+    public byte[] createHeaderPutChunk(String version, int sender_id, int file_id, int chunk_num, int replication, byte[] bytes){
+    	String message = "PUTCHUNK" + " " + version + " " + sender_id + " " + " " + file_id + " " + chunk_num + " " + replication + "\r\n\r\n";
         return message.getBytes();
     }
 
@@ -73,10 +73,10 @@ class Server implements Peer {
     }
 
 
-    public void putchunk(int version, int sender_id, int file_id, int chunk_num, int replication, byte[] bytes) throws IOException {
-
-        sendPacket = new DatagramPacket(bytes, bytes.length, this.mdb_group, this.mdb_port);
-        this.mdb.send(sendPacket);
+    public void putchunk(String version, int sender_id, int file_id, int chunk_num, int replication, byte[] bytes) throws IOException {
+    	Message message = new Message(version, sender_id, file_id, chunk_num, replication, bytes);
+        DatagramPacket packet = new DatagramPacket(message.buf, message.buf_len, this.mdb_group, this.mdb_port);
+        this.mdb.send(packet);
     }
 
     public void receive() throws IOException {
@@ -94,7 +94,7 @@ class Server implements Peer {
                     mdb.receive(recv);
 
                     System.out.println("After Receive");
-                    System.out.println(new String(buf));
+                    System.out.println(new Message(recv));
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -126,13 +126,13 @@ class Server implements Peer {
         try {
             InputStream inFile = new FileInputStream(FILES_DIR + filename);
 
-            int readBytes = 0;
+            int readBytes = 0, numChunks = 0;
             byte[] bytes = new byte[CHUNK_SIZE];
 
             while ((readBytes = inFile.read(bytes, 0, CHUNK_SIZE)) != -1) {
-                System.out.println(new String(bytes));
+            	numChunks++;
                 System.out.println("Put Chunk");
-                putchunk(1, 0, 0, readBytes, replication, bytes);
+                putchunk("1.0", 0, numChunks, readBytes, replication, bytes);
             }
 
             inFile.close();
