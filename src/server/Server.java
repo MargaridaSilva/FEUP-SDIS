@@ -4,7 +4,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import protocol.Message;
+import protocol.ProtocolMessage;
+import protocol.ProtocolMessage.Type;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -16,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-
 import utilities.Utilities;
 import utilities.FileSystem;
 
@@ -71,26 +71,28 @@ class Server implements Peer {
         return message.getBytes();
     }
 
-    public void putchunk(String version, int sender_id, String file_id, int chunk_num, int replication, byte[] bytes,
+    public void putchunk(int sender_id, String file_id, int chunk_num, int replication, byte[] bytes,
             int readBytes) throws IOException {
-    	Message message = new Message("PUTCHUNK", version, sender_id, file_id, chunk_num, replication, bytes, readBytes);
+    	ProtocolMessage message = new ProtocolMessage("PUTCHUNK", sender_id, file_id, chunk_num, replication, bytes, readBytes);
         DatagramPacket packet = new DatagramPacket(message.buf, message.buf_len, this.mdb_group, this.mdb_port);
         this.mdb.send(packet);
     }
     
-    public void stored(String version, int sender_id, String file_id, int chunk_num) throws IOException {
-    	Message message = new Message("STORED", version, sender_id, file_id, chunk_num, 0, null, 0);
+    public void stored(int sender_id, String file_id, int chunk_num) throws IOException {
+    	ProtocolMessage message = new ProtocolMessage("STORED", sender_id, file_id, chunk_num, 0, null, 0);
     	DatagramPacket packet = new DatagramPacket(message.buf, message.buf_len, this.mc_group, this.mc_port);
         this.mc.send(packet);
     }
 
 
-    private void processMessage(Message message) {
+    private void processMessage(ProtocolMessage message) {
         switch(message.type){
-            case "PUTCHUNK": 
+            case PUTCHUNK: 
                 this.fs.createChunk(message.file_id, message.chunk_num, message.body, message.body_len);
                 
                 break;
+		default:
+			break;
         }
     }
 
@@ -113,7 +115,7 @@ class Server implements Peer {
                         mdb.receive(recv);
 
                         System.out.println("After Receive");
-                        Message message = new Message(recv);
+                        ProtocolMessage message = new ProtocolMessage(recv);
 
                         processMessage(message);
                 }
@@ -155,7 +157,7 @@ class Server implements Peer {
             while ((readBytes = in_file.read(bytes, 0, Utilities.CHUNK_SIZE)) != -1) {
                 System.out.println("Put Chunk");
 
-                putchunk("1.0", this.server_id, file_id, i, replication, bytes, readBytes);
+                putchunk(this.server_id, file_id, i, replication, bytes, readBytes);
 
                 i++;
             }
