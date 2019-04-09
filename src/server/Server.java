@@ -56,14 +56,12 @@ class Server implements Peer {
     public void putchunk(String version, int sender_id, String file_id, int chunk_num, int replication, byte[] bytes,
             int readBytes) throws IOException {
     	Message message = new Message("PUTCHUNK", version, sender_id, file_id, chunk_num, replication, bytes, readBytes);
-        DatagramPacket packet = new DatagramPacket(message.buf, message.buf_len, this.mdb_group, this.mdb_port);
-        this.mdb.send(packet);
+        this.mdb.sendMessage(message);
     }
     
     public void stored(String version, int sender_id, String file_id, int chunk_num) throws IOException {
     	Message message = new Message("STORED", version, sender_id, file_id, chunk_num, 0, null, 0);
-    	DatagramPacket packet = new DatagramPacket(message.buf, message.buf_len, this.mc_group, this.mc_port);
-        this.mc.send(packet);
+    	this.mc.sendMessage(message);
     }
 
 

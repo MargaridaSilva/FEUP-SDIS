@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
+import protocol.Message;
 import utilities.Utilities;
 
 public class Channel implements Runnable{
@@ -25,12 +28,13 @@ public class Channel implements Runnable{
 
     public void startReceive() throws IOException {
         Executor e = Executors.newSingleThreadExecutor();
-        e.execute(mdbTask);
+        e.execute(this);
     }
 
 
-    public void sendMessage(Message message){
-
+    public void sendMessage(Message message) throws IOException {
+        DatagramPacket packet = new DatagramPacket(message.buf, message.buf_len, this.inet_addr, this.port);
+        this.socket.send(packet);
 
     }
 
@@ -45,11 +49,7 @@ public class Channel implements Runnable{
                 System.out.println("Before Receive");
                 socket.receive(recv);
 
-
                 System.out.println("After Receive");
-                Message message = new Message(recv);
-
-                processMessage(message);
         }
 
         } catch (IOException e) {
