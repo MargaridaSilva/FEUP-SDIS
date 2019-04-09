@@ -4,7 +4,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.Arrays;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import protocol.MessageHandler;
@@ -16,6 +16,7 @@ public class Channel implements Runnable {
     private InetAddress inet_addr;
     private int port;
     private MulticastSocket socket;
+    private ExecutorService e;
 
     public Channel(String addr, int port) throws IOException {
         this.inet_addr = InetAddress.getByName(addr);
@@ -25,8 +26,13 @@ public class Channel implements Runnable {
     }
 
     public void startReceive() throws IOException {
-        Executor e = Executors.newSingleThreadExecutor();
-        e.execute(this);
+        this.e = Executors.newSingleThreadExecutor();
+        this.e.execute(this);
+    }
+
+    public void stopReceive() throws IOException {
+        this.e.shutdown();
+        this.socket.leaveGroup(this.inet_addr);
     }
 
     public void sendMessage(ProtocolMessage message) throws IOException {
@@ -39,7 +45,7 @@ public class Channel implements Runnable {
         System.out.println("Listening...");
         byte[] buf = new byte[Utilities.UDP_MAX];
         DatagramPacket recv = new DatagramPacket(buf, buf.length);
-        while(true){
+        while(!Thread.interrupted()){
             try {
                 socket.receive(recv);
                 byte[] buf_copy = Arrays.copyOf(recv.getData(),recv.getLength());

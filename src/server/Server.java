@@ -1,37 +1,31 @@
 package server;
 
 import java.rmi.server.UnicastRemoteObject;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
-import protocol.ProtocolMessage;
-
+import protocol.Protocol;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.DatagramPacket;
 import utilities.Utilities;
 import utilities.FileSystem;
 import channel.Channel;
 
 class Server implements Peer {
 
+    private int protocol_ver;
     private int server_id;
-
     private Channel mc;
     private Channel mdb;
     private Channel mdr;
-
-    private DatagramPacket sendPacket;
-    private DatagramPacket receivePacket;
     
-    Server(int server_id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port)
+    Server(int protocol_ver, int server_id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr,
+            int mdr_port)
             throws IOException {
 
+
+        this.protocol_ver = protocol_ver;
         this.server_id = server_id;
         FileSystem.init(this.server_id);
         FileSystem.getInstance().createPeerFileStructure();
@@ -40,26 +34,10 @@ class Server implements Peer {
         this.mdb = new Channel(mdb_addr, mdb_port);
         this.mdr = new Channel(mdr_addr, mdr_port);
 
+        ServerInfo.init(this.server_id, this.mc, this.mdb, this.mdr);
+
         listenChannels();
     }
-
-
-    public byte[] createHeaderPutChunk(String version, int sender_id, String file_id, int chunk_num, int replication, byte[] bytes){
-    	String message = "PUTCHUNK" + " " + version + " " + sender_id + " " + " " + file_id + " " + chunk_num + " " + replication + "\r\n\r\n";
-        return message.getBytes();
-    }
-
-    public void putchunk(int sender_id, String file_id, int chunk_num, int replication, byte[] bytes,
-            int readBytes) throws IOException {
-        ProtocolMessage message = new ProtocolMessage("PUTCHUNK", sender_id, file_id, chunk_num, replication, bytes, readBytes);
-        this.mdb.sendMessage(message);
-    }
-    
-    public void stored(String version, int sender_id, String file_id, int chunk_num) throws IOException {
-    	ProtocolMessage message = new ProtocolMessage("STORED", sender_id, file_id, chunk_num, 0, null, 0);
-    	this.mc.sendMessage(message);
-    }
-
 
     public void listenChannels(){
         try {
@@ -71,10 +49,14 @@ class Server implements Peer {
         }
     }
 
-    public void close() {
-        // mc.leaveGroup(mc_group);
-        // mdb.leaveGroup(mdb_port);
-        // mdr.leaveGroup(mdr_port);
+    public void closeChannels() {
+        try {
+            this.mc.stopReceive();
+            this.mdb.stopReceive();
+            this.mdr.stopReceive();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override   
@@ -92,7 +74,7 @@ class Server implements Peer {
             while ((readBytes = in_file.read(bytes, 0, Utilities.CHUNK_SIZE)) != -1) {
                 System.out.println("Put Chunk");
 
-                putchunk(this.server_id, file_id, i, replication, bytes, readBytes);
+                Protocol.putchunk(file_id, i, replication, bytes, readBytes);
 
                 i++;
             }
@@ -156,7 +138,7 @@ class Server implements Peer {
         int mdr_port = Utilities.mdr_port;
 
         try {
-            Server server = new Server(server_id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port);
+            Server server = new Server(protocol_ver, server_id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port);
 
             Peer stub = (Peer) UnicastRemoteObject.exportObject(server, 0);
 

@@ -2,8 +2,6 @@ package protocol;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import utilities.Utilities;
@@ -32,27 +30,29 @@ public class ProtocolMessage {
             header = new String(header_bytes);
             body = Arrays.copyOfRange(buf, index + FINAL_SEQ.length(), buf_len);
             body_len = body.length;
+            this.processHeader(header);
         }
         else{
             //Throw Error
         }
-
-        this.processHeader(header);
     }
 
     public ProtocolMessage(String sub_protocol, int sender_id, String file_id, int chunk_num, int replication, byte[] body, int body_len) {
 
-        String header = String.join(" ", "PUTCHUNK", ProtocolMessage.version, String.valueOf(sender_id), file_id, String.valueOf(chunk_num),
+        String header = String.join(" ", sub_protocol, ProtocolMessage.version, String.valueOf(sender_id), file_id, String.valueOf(chunk_num),
                 String.valueOf(replication), FINAL_SEQ);
         
         byte[] header_bytes = header.getBytes();
 
-
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         try {
-            outputStream.write(header_bytes);
-            outputStream.write(body, 0, body_len);
+            if(header_bytes != null){
+                outputStream.write(header_bytes);
+            }
+            if(body != null){
+                outputStream.write(body, 0, body_len);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

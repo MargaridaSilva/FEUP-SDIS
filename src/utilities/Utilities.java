@@ -63,7 +63,12 @@ public class Utilities {
                 j = 0;
             }
         }
-        return -1;
+
+        if(j == sequence.length){
+            return i - sequence.length;
+        }else{
+            return -1;
+        }
     }
 
 }
