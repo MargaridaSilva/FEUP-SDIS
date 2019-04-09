@@ -16,25 +16,19 @@ import java.net.InetAddress;
 
 import utilities.Utilities;
 import utilities.FileSystem;
+import channel.Channel;
 
 class Server implements Peer {
 
     private int server_id;
 
-    private MulticastSocket mc;
-    private MulticastSocket mdb;
-    private MulticastSocket mdr;
-
-    private InetAddress mc_group;
-    private InetAddress mdb_group;
-    private InetAddress mdr_group;
-
-    private int mc_port;
-    private int mdb_port;
-    private int mdr_port;
+    private Channel mc;
+    private Channel mdb;
+    private Channel mdr;
 
     private DatagramPacket sendPacket;
     private DatagramPacket receivePacket;
+
 
     private FileSystem fs;
     
@@ -45,21 +39,9 @@ class Server implements Peer {
         this.fs = new FileSystem(this.server_id);
         this.fs.createPeerFileStructure();
 
-        this.mc_group = InetAddress.getByName(mc_addr);
-        this.mdb_group = InetAddress.getByName(mdb_addr);
-        this.mdr_group = InetAddress.getByName(mdr_addr);
-
-        this.mc_port = mc_port;
-        this.mdb_port = mdb_port;
-        this.mdr_port = mdr_port;
-
-        this.mc = new MulticastSocket(this.mc_port);
-        this.mdb = new MulticastSocket(this.mdb_port);
-        this.mdr = new MulticastSocket(this.mdr_port);
-
-        this.mc.joinGroup(this.mc_group);
-        this.mdb.joinGroup(this.mdb_group);
-        this.mdr.joinGroup(this.mdr_group);
+        this.mc = new Channel(mc_addr, mc_port);
+        this.mdb = new Channel(mdb_addr, mdb_port);
+        this.mdr = new Channel(mdr_addr, mdr_port);
     }
 
 
@@ -84,50 +66,20 @@ class Server implements Peer {
         }
     }
 
-    public void receive() throws IOException {
-
-        // this.fs.createFileDir(file_id);
-        // this.fs.createChunk(file_id, i, bytes, readBytes);
-
-        Runnable mdbTask = new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("Listening...");
-                byte[] buf = new byte[Utilities.UDP_MAX];
-                DatagramPacket recv = new DatagramPacket(buf, buf.length);
-
-                try {
-                    while(true){
-                    
-                        System.out.println("Before Receive");
-                        mdb.receive(recv);
-
-                        System.out.println("After Receive");
-                        Message message = new Message(recv);
-
-                        processMessage(message);
-                }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        };
-
-        Executor e = Executors.newSingleThreadExecutor();
-        e.execute(mdbTask);
-
+    public void listenChannels(){
+        try {
+            this.mc.startReceive();
+            this.mdb.startReceive();
+            this.mdr.startReceive();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void close() {
         // mc.leaveGroup(mc_group);
         // mdb.leaveGroup(mdb_port);
         // mdr.leaveGroup(mdr_port);
-    }
-
-    public void joinGroup() {
-
     }
 
     @Override   
