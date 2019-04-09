@@ -15,6 +15,8 @@ class Message {
     byte[] buf, body;
     int buf_len, body_len;
 
+    public static final String FINAL_SEQ = "\r\n\r\n";
+
     public Message(DatagramPacket packet) {
         buf = packet.getData();
         buf_len = packet.getLength();
@@ -27,7 +29,7 @@ class Message {
         // REFACTOR: WHILE MESSAGE NOT EMPTY
 
         // for (byte ch: buf) {
-        // char c = (char) ch;
+        // char c = (char) ch;  
         // if (c=='\r'){
         // if (this.isEmptyHeader(header)){
         // break;
@@ -39,12 +41,16 @@ class Message {
         // header += c;
         // }
 
-        int index = Utilities.indexOf(buf, (byte) '\r');
+        int index = Utilities.indexSeq(buf, FINAL_SEQ.getBytes());
+
         if (index != -1) {
             byte[] header_bytes = Arrays.copyOfRange(buf, 0, index - 1);
             header = new String(header_bytes);
-            body = Arrays.copyOfRange(buf, index + 1, buf_len);
+            body = Arrays.copyOfRange(buf, index + FINAL_SEQ.length(), buf_len);
             body_len = body.length;
+        }
+        else{
+            //Throw Error
         }
 
         String[] args = header.split(" ");
@@ -63,7 +69,7 @@ class Message {
     public Message(String version, int sender_id, String file_id, int chunk_num, int replication, byte[] body, int body_len) {
 
         String header = String.join(" ", "PUTCHUNK", version, String.valueOf(sender_id), file_id, String.valueOf(chunk_num),
-                String.valueOf(replication), "\r\n\r\n");
+                String.valueOf(replication), FINAL_SEQ);
         
         byte[] header_bytes = header.getBytes();
 

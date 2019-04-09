@@ -43,13 +43,24 @@ public class Utilities {
         return bytesToHex(hash);
     }
 
-    public static int indexOf(byte[] array, byte valueToFind) {
+    public static int indexSeq(byte[] array, byte[] sequence) {
         if (array == null) {
             return -1;
         }
-        for (int i = 0; i < array.length; i++) {
-            if (valueToFind == array[i]) {
-                return i;
+        int i = 0;
+        int j = 0;
+
+        for (i = 0; i < array.length; i++) {
+
+            if(j == sequence.length){
+                return i - sequence.length;
+            }
+
+            if (sequence[j] == array[i]) {
+                j++;
+            }
+            else{
+                j = 0;
             }
         }
         return -1;

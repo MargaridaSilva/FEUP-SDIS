@@ -97,13 +97,16 @@ class Server implements Peer {
                 DatagramPacket recv = new DatagramPacket(buf, buf.length);
 
                 try {
-                    System.out.println("Before Receive");
-                    mdb.receive(recv);
+                    while(true){
+                    
+                        System.out.println("Before Receive");
+                        mdb.receive(recv);
 
-                    System.out.println("After Receive");
-                    Message message = new Message(recv);
+                        System.out.println("After Receive");
+                        Message message = new Message(recv);
 
-                    processMessage(message);
+                        processMessage(message);
+                }
 
                 } catch (IOException e) {
                     e.printStackTrace();
