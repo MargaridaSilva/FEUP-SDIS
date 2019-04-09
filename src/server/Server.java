@@ -3,6 +3,9 @@ package server;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+
+import protocol.Message;
+
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -70,9 +73,15 @@ class Server implements Peer {
 
     public void putchunk(String version, int sender_id, String file_id, int chunk_num, int replication, byte[] bytes,
             int readBytes) throws IOException {
-    	Message message = new Message(version, sender_id, file_id, chunk_num, replication, bytes, readBytes);
+    	Message message = new Message("PUTCHUNK", version, sender_id, file_id, chunk_num, replication, bytes, readBytes);
         DatagramPacket packet = new DatagramPacket(message.buf, message.buf_len, this.mdb_group, this.mdb_port);
         this.mdb.send(packet);
+    }
+    
+    public void stored(String version, int sender_id, String file_id, int chunk_num) throws IOException {
+    	Message message = new Message("STORED", version, sender_id, file_id, chunk_num, 0, null, 0);
+    	DatagramPacket packet = new DatagramPacket(message.buf, message.buf_len, this.mc_group, this.mc_port);
+        this.mc.send(packet);
     }
 
 
@@ -80,6 +89,7 @@ class Server implements Peer {
         switch(message.type){
             case "PUTCHUNK": 
                 this.fs.createChunk(message.file_id, message.chunk_num, message.body, message.body_len);
+                
                 break;
         }
     }

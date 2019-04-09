@@ -1,4 +1,4 @@
-package server;
+package protocol;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -8,12 +8,12 @@ import java.util.Arrays;
 
 import utilities.Utilities;
 
-class Message {
-    String version, file_id;
-    int sender_id, chunk_num, replication;
-    String message, type;
-    byte[] buf, body;
-    int buf_len, body_len;
+public class Message {
+    public String version, file_id;
+    public int sender_id, chunk_num, replication;
+    public String message, type;
+    public byte[] buf, body;
+    public int buf_len, body_len;
 
     public static final String FINAL_SEQ = "\r\n\r\n";
 
@@ -66,7 +66,7 @@ class Message {
         this.printMessageInfo();
     }
 
-    public Message(String version, int sender_id, String file_id, int chunk_num, int replication, byte[] body, int body_len) {
+    public Message(String sub_protocol, String version, int sender_id, String file_id, int chunk_num, int replication, byte[] body, int body_len) {
 
         String header = String.join(" ", "PUTCHUNK", version, String.valueOf(sender_id), file_id, String.valueOf(chunk_num),
                 String.valueOf(replication), FINAL_SEQ);
