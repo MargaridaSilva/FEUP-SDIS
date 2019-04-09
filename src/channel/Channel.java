@@ -1,5 +1,6 @@
 package channel;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -7,12 +8,12 @@ import java.net.MulticastSocket;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import protocol.Message;
+import protocol.MessageHandler;
+import protocol.ProtocolMessage;
 import utilities.Utilities;
 
 public class Channel implements Runnable{
 
-    // private ChannelListener listener;
     private InetAddress inet_addr;
     private int port;
     private MulticastSocket socket;
@@ -22,7 +23,6 @@ public class Channel implements Runnable{
         this.port = port;
         this.socket = new MulticastSocket(this.port);
         this.socket.joinGroup(this.inet_addr);
-        // this.listener = new ChannelListener();
     }
 
 
@@ -32,10 +32,9 @@ public class Channel implements Runnable{
     }
 
 
-    public void sendMessage(Message message) throws IOException {
+    public void sendMessage(ProtocolMessage message) throws IOException {
         DatagramPacket packet = new DatagramPacket(message.buf, message.buf_len, this.inet_addr, this.port);
         this.socket.send(packet);
-
     }
 
     @Override
@@ -43,14 +42,13 @@ public class Channel implements Runnable{
         System.out.println("Listening...");
         byte[] buf = new byte[Utilities.UDP_MAX];
         DatagramPacket recv = new DatagramPacket(buf, buf.length);
-
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        
         try {
-            while(true){
-                System.out.println("Before Receive");
                 socket.receive(recv);
-
-                System.out.println("After Receive");
-        }
+                outputStream.write(recv.getData(), 0, recv.getLength());
+                MessageHandler task = new MessageHandler(outputStream.toByteArray());
+                ThreadPool.executor.execute(task);
 
         } catch (IOException e) {
             e.printStackTrace();
