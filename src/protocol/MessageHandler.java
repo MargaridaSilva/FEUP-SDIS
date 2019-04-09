@@ -1,6 +1,5 @@
 package protocol;
 
-import java.net.DatagramPacket;
 import protocol.ProtocolMessage;
 import utilities.FileSystem;
 

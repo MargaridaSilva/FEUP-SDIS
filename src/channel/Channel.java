@@ -1,10 +1,9 @@
 package channel;
-
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -12,7 +11,7 @@ import protocol.MessageHandler;
 import protocol.ProtocolMessage;
 import utilities.Utilities;
 
-public class Channel implements Runnable{
+public class Channel implements Runnable {
 
     private InetAddress inet_addr;
     private int port;
@@ -25,12 +24,10 @@ public class Channel implements Runnable{
         this.socket.joinGroup(this.inet_addr);
     }
 
-
     public void startReceive() throws IOException {
         Executor e = Executors.newSingleThreadExecutor();
         e.execute(this);
     }
-
 
     public void sendMessage(ProtocolMessage message) throws IOException {
         DatagramPacket packet = new DatagramPacket(message.buf, message.buf_len, this.inet_addr, this.port);
@@ -42,17 +39,18 @@ public class Channel implements Runnable{
         System.out.println("Listening...");
         byte[] buf = new byte[Utilities.UDP_MAX];
         DatagramPacket recv = new DatagramPacket(buf, buf.length);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        
-        try {
+        while(true){
+            try {
                 socket.receive(recv);
-                outputStream.write(recv.getData(), 0, recv.getLength());
-                MessageHandler task = new MessageHandler(outputStream.toByteArray());
+                byte[] buf_copy = Arrays.copyOf(recv.getData(),recv.getLength());
+                MessageHandler task = new MessageHandler(buf_copy);
                 ThreadPool.executor.execute(task);
-
-        } catch (IOException e) {
-            e.printStackTrace();
+    
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+       
     }
 
 }
