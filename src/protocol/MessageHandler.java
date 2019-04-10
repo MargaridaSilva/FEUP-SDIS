@@ -58,12 +58,12 @@ public class MessageHandler implements Runnable {
 	}	
 	
 	private void handle_getchunk(ProtocolMessage message) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 	
 	private void handle_chunk(ProtocolMessage message) {
-		// TODO Auto-generated method stub
+		System.out.println("Received Chunk");
 		
 	}
 	
@@ -76,7 +76,7 @@ public class MessageHandler implements Runnable {
 	}
 	
 	private void handle_removed(ProtocolMessage message) {
-		// TODO Auto-generated method stub
+		System.out.println("Received removed");
 		
 	}
 
