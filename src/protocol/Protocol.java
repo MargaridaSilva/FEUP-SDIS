@@ -9,8 +9,16 @@ public class Protocol {
     private static ServerInfo server = ServerInfo.getInstance();
 
     public static void putchunk(String file_id, int chunk_num, int replication, byte[] bytes, int readBytes) throws IOException {
+        System.out.println("Put Chunk");
+
         ProtocolMessage message = new ProtocolMessage("PUTCHUNK", server.server_id, file_id, chunk_num, replication, bytes, readBytes);
         server.mdb.sendMessage(message);
+        
+        // Start timer
+        // If receive stored >= replication (=>) stop timer
+
+        // On time event
+        // Send again
     }
     
     public static void stored(String file_id, int chunk_num) throws IOException {

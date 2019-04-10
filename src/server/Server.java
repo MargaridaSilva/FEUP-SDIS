@@ -63,7 +63,6 @@ class Server implements Peer {
     public String backup(String filename, int replication) throws RemoteException {
 
         try{
-
             InputStream in_file = new FileInputStream(Utilities.FILES_DIR + filename);
             String file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
 
@@ -72,10 +71,7 @@ class Server implements Peer {
             int i = 0;
 
             while ((readBytes = in_file.read(bytes, 0, Utilities.CHUNK_SIZE)) != -1) {
-                System.out.println("Put Chunk");
-
                 Protocol.putchunk(file_id, i, replication, bytes, readBytes);
-
                 i++;
             }
 
