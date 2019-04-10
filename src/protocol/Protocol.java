@@ -25,4 +25,9 @@ public class Protocol {
     	ProtocolMessage message = new ProtocolMessage("STORED", server.server_id, file_id, chunk_num, 0, null, 0);
         server.mc.sendMessage(message);
     }
+    
+    public static void getchunk(String file_id, int chunk_num) throws IOException {
+    	ProtocolMessage message = new ProtocolMessage("STORED", server.server_id, file_id, chunk_num, 0, null, 0);
+        server.mdb.sendMessage(message);
+    }
 }

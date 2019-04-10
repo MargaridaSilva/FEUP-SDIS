@@ -1,6 +1,8 @@
 package server;
 
 import java.rmi.server.UnicastRemoteObject;
+import java.security.NoSuchAlgorithmException;
+
 import protocol.Protocol;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -86,13 +88,35 @@ class Server implements Peer {
 
     @Override
     public String restore(int peer_ap, String filename) throws RemoteException {
-        return filename;
-
+    	//TO REFACTOR WITH DATA STRUCTURE
+    	int n_chunks = 3;
+    	
+    	
+    	String file_id;
+		try {
+			file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
+			for(int i = 0; i < n_chunks; i++) {
+	    		try {
+					Protocol.getchunk(file_id, i);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+	    	}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "OK";
     }
 
     @Override
     public String delete(int peer_ap, String filename) throws RemoteException {
-        return filename;
+    	try {
+			String file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return filename;
 
     }
 

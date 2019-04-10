@@ -20,35 +20,64 @@ public class MessageHandler implements Runnable {
 		message.printMessageInfo();
 		switch (message.type) {
 		case PUTCHUNK:
-			putchunk(message);
+			handle_putchunk(message);
 			break;
 		case STORED:
-			stored(message);
+			handle_stored(message);
 			break;
 		case GETCHUNK:
+			handle_getchunk(message);
 			break;
 		case CHUNK:
+			handle_chunk(message);
 			break;
 		case DELETE:
+			handle_delete(message);
 			break;
 		case REMOVED:
+			handle_removed(message);
 		}
 	}
 
-	private void stored(ProtocolMessage message) {
-		System.out.println("Received Stored");
-	}
 
-	private void putchunk(ProtocolMessage message) {
+	private void handle_putchunk(ProtocolMessage message) {
 		if(message.sender_id == ServerInfo.getInstance().server_id){
 			return;
 		}
 
-		FileSystem.getInstance().createChunk(message.file_id, message.chunk_num, message.body, message.body_len);
+		FileSystem.getInstance().save_chunk(message.file_id, message.chunk_num, message.body, message.body_len);
 		try {
 			Protocol.stored(message.file_id, message.chunk_num);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+	
+	private void handle_stored(ProtocolMessage message) {
+		System.out.println("Received Stored");
+	}	
+	
+	private void handle_getchunk(ProtocolMessage message) {
+		
+		
+	}
+	
+	private void handle_chunk(ProtocolMessage message) {
+		System.out.println("Received Chunk");
+		
+	}
+	
+	private void handle_delete(ProtocolMessage message) {
+		/*if(message.sender_id == ServerInfo.getInstance().server_id){
+			return;
+		}*/
+
+		FileSystem.getInstance().delete_file(message.file_id);
+	}
+	
+	private void handle_removed(ProtocolMessage message) {
+		System.out.println("Received removed");
+		
+	}
+
 }

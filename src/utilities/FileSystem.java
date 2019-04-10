@@ -1,8 +1,10 @@
 package utilities;
 
 import java.io.FileOutputStream;
+
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 
@@ -58,7 +60,7 @@ public class FileSystem {
         }
     }
 
-    public void createFileDir(String file_id) {
+    public void create_file_dir(String file_id) {
 
         String new_path = this.backup_path + file_id;
         if(Files.notExists(Paths.get(new_path))){
@@ -70,6 +72,7 @@ public class FileSystem {
         }
 
     }
+ 
 
     public String getBackupPath() {
         return backup_path;
@@ -79,8 +82,8 @@ public class FileSystem {
         return restored_path;
     }
 
-    public void createChunk(String file_id, int chunk_no, byte[] bytes, int size) {
-        createFileDir(file_id);
+    public void save_chunk(String file_id, int chunk_no, byte[] bytes, int size) {
+        create_file_dir(file_id);
 
         FileOutputStream fos;
         try {
@@ -92,6 +95,34 @@ public class FileSystem {
             e.printStackTrace();
         } 
 	}
+    
+    public void delete_chunk(String file_id, int chunk_no) {
+        String file_path = this.backup_path + file_id + "/" + chunk_no;
+        
+    	Path chunk = Paths.get(file_path);
+
+        if (Files.exists(chunk) && Files.isRegularFile(chunk))
+			try {
+				Files.delete(chunk);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    }
+    
+    public void delete_file(String file_id) {
+        String file_path = this.backup_path + file_id;
+        
+    	Path directory = Paths.get(file_path);
+
+        if (Files.exists(directory) && Files.isDirectory(directory))
+			try {
+				Files.delete(directory);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    }
 
 
 }
