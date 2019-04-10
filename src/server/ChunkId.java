@@ -1,12 +1,20 @@
 package server;
 
-class ChunkId {
+public class ChunkId {
     String fileId;
     int chunk_no;
 
-    ChunkId(String fileId, int chunk_no){
+    public ChunkId(String fileId, int chunk_no){
         this.fileId = fileId;
         this.chunk_no = chunk_no;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + this.fileId.hashCode();
+        result = 31 * result + this.chunk_no;
+        return result;
     }
 
     @Override
