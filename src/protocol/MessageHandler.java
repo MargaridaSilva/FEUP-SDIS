@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import protocol.ProtocolMessage;
 import server.ChunkId;
-import server.FileState;
+import server.ServerState;
 import server.ServerInfo;
 import utilities.FileSystem;
 
@@ -56,7 +56,7 @@ public class MessageHandler implements Runnable {
 	}
 	
 	private void handle_stored(ProtocolMessage message) {
-		FileState.add_ack(new ChunkId(message.file_id, message.chunk_num), message.sender_id);
+		ServerState.add_ack(new ChunkId(message.file_id, message.chunk_num), message.sender_id);
 	}	
 	
 	private void handle_getchunk(ProtocolMessage message) {

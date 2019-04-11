@@ -1,25 +1,27 @@
 package protocol;
 
 import java.io.IOException;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import server.ChunkId;
-import server.FileState;
+import server.ServerState;
 import server.ServerInfo;
 
 public class Protocol {
 
     private static final int MAX_TRIES = 5;
-    private static final int BASE_WAIT_TIME = 1000; //1sec
+    private static final int BASE_WAIT_TIME_MS = 1000;
+    private static final int STORED_MAX_DELAY_MS = 400;
 
     private static ServerInfo server = ServerInfo.getInstance();
 
-    public static void putchunk(String file_id, int chunk_num, int replication, byte[] bytes, int readBytes)
+    public static void putchunk(ChunkId chunk_id, int replication, byte[] bytes, int readBytes)
             throws IOException {
         System.out.println("Put Chunk");
 
-        ProtocolMessage message = new ProtocolMessage("PUTCHUNK", server.server_id, file_id, chunk_num, replication,
+        ProtocolMessage message = new ProtocolMessage("PUTCHUNK", server.server_id, chunk_id.file_id, chunk_id.chunk_no, replication,
                 bytes, readBytes);
 
         // TimerTask task = new TimerTask() {
@@ -32,12 +34,11 @@ public class Protocol {
         // server.mdb.sendMessage(message);
         // timer.schedule(task, 400L);
 
-        ChunkId chunk_id = new ChunkId(file_id, chunk_num);
         int tries = 0;
         int ack_num;
-        int wait_time = BASE_WAIT_TIME;
+        int wait_time = BASE_WAIT_TIME_MS;
 
-        do{
+        do {
             server.mdb.sendMessage(message);
             try {
                 System.out.println("Going to sleep...");
@@ -46,17 +47,23 @@ public class Protocol {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            ack_num = FileState.get_ack_num(chunk_id);
+            ack_num = ServerState.get_ack_num(chunk_id);
 
             tries++;
-            wait_time*=2;
+            wait_time *= 2;
 
             System.out.println("Try no. " + tries);
-        }while(tries < MAX_TRIES && ack_num < replication);
+        } while (tries < MAX_TRIES && ack_num < replication);
     }
 
     public static void stored(String file_id, int chunk_num) throws IOException {
         ProtocolMessage message = new ProtocolMessage("STORED", server.server_id, file_id, chunk_num, 0, null, 0);
+        Random rand = new Random();
+        try {
+            Thread.sleep(rand.nextInt(STORED_MAX_DELAY_MS + 1));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         server.mc.sendMessage(message);
     }
 
