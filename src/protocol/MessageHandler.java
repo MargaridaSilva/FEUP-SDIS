@@ -3,8 +3,8 @@ package protocol;
 import java.io.IOException;
 
 import protocol.ProtocolMessage;
-import server.ChunkId;
-import server.ServerState;
+import state.ChunkId;
+import state.ServerState;
 import server.ServerInfo;
 import utilities.FileSystem;
 
@@ -47,16 +47,19 @@ public class MessageHandler implements Runnable {
 			return;
 		}
 
+		ChunkId chunk_id =  new ChunkId(message.file_id, message.chunk_num);
 		FileSystem.getInstance().save_chunk(message.file_id, message.chunk_num, message.body, message.body_len);
+		ServerState.store_log(chunk_id, message.body_len);
 		try {
-			Protocol.stored(message.file_id, message.chunk_num);
+			Protocol.stored(chunk_id);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	private void handle_stored(ProtocolMessage message) {
-		ServerState.add_ack(new ChunkId(message.file_id, message.chunk_num), message.sender_id);
+		ChunkId chunk_id =  new ChunkId(message.file_id, message.chunk_num);
+		ServerState.add_ack(chunk_id, message.sender_id);
 	}	
 	
 	private void handle_getchunk(ProtocolMessage message) {

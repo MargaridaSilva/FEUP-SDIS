@@ -1,9 +1,11 @@
 package server;
 
 import java.rmi.server.UnicastRemoteObject;
-import java.security.NoSuchAlgorithmException;
 
 import protocol.Protocol;
+import state.ChunkId;
+import state.ServerState;
+
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -61,10 +63,12 @@ class Server implements Peer {
         }
     }
 
+    private void printInfo() {
+        System.out.println("Server: " + this.server_id);
+    }
+
     @Override   
     public String backup(String filename, int replication) throws RemoteException {
-
-
 
         try{
             InputStream in_file = new FileInputStream(Utilities.FILES_DIR + filename);
@@ -78,13 +82,11 @@ class Server implements Peer {
             while ((readBytes = in_file.read(bytes, 0, Utilities.CHUNK_SIZE)) != -1) {
                 ChunkId chunk_id = new ChunkId(file_id, i);
                 Protocol.putchunk(chunk_id, replication, bytes, readBytes);
-                ServerState.backup_chunk_log(file_id, i, ServerState.get_ack_num(chunk_id));
+                ServerState.backup_chunk_log(chunk_id);
                 i++;
             }
 
             in_file.close();
-
-            ServerState.print_backup_log(file_id);
 
         }catch(Exception e){
             e.printStackTrace();
@@ -94,7 +96,7 @@ class Server implements Peer {
     }
 
     @Override
-    public String restore(int peer_ap, String filename) throws RemoteException {
+    public String restore(String filename) throws RemoteException {
     	//TO REFACTOR WITH DATA STRUCTURE
     	int n_chunks = 3;
     	
@@ -104,7 +106,7 @@ class Server implements Peer {
 			file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
 			for(int i = 0; i < n_chunks; i++) {
 	    		try {
-					Protocol.getchunk(file_id, i);
+					Protocol.getchunk(new ChunkId(file_id, i));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -116,7 +118,7 @@ class Server implements Peer {
     }
 
     @Override
-    public String delete(int peer_ap, String filename) throws RemoteException {
+    public String delete(String filename) throws RemoteException {
     	try {
 			String file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
 		} catch (Exception e) {
@@ -128,15 +130,14 @@ class Server implements Peer {
     }
 
     @Override
-    public String reclaim(int peer_ap, int arg) throws RemoteException {
+    public String reclaim(int space) throws RemoteException {
         return null;
 
     }
 
     @Override
-    public String state(int peer_ap) throws RemoteException {
-        return null;
-
+    public String state() throws RemoteException {
+        return  ServerState.backup_log_info() + ServerState.store_log_info();
     }
 
     // protocol version, the server id, service access point, MC, MDB, MDR
@@ -166,7 +167,7 @@ class Server implements Peer {
 
         try {
             Server server = new Server(protocol_ver, server_id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port);
-
+            server.printInfo();
             Peer stub = (Peer) UnicastRemoteObject.exportObject(server, 0);
 
             Registry registry = LocateRegistry.createRegistry(1099);
@@ -175,4 +176,6 @@ class Server implements Peer {
         } catch (Exception e) {
         }
     }
+
+ 
 }

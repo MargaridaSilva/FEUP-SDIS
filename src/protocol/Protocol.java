@@ -5,8 +5,8 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import server.ChunkId;
-import server.ServerState;
+import state.ChunkId;
+import state.ServerState;
 import server.ServerInfo;
 
 public class Protocol {
@@ -56,8 +56,8 @@ public class Protocol {
         } while (tries < MAX_TRIES && ack_num < replication);
     }
 
-    public static void stored(String file_id, int chunk_num) throws IOException {
-        ProtocolMessage message = new ProtocolMessage("STORED", server.server_id, file_id, chunk_num, 0, null, 0);
+    public static void stored(ChunkId chunk_id) throws IOException {
+        ProtocolMessage message = new ProtocolMessage("STORED", server.server_id, chunk_id.file_id, chunk_id.chunk_no, 0, null, 0);
         Random rand = new Random();
         try {
             Thread.sleep(rand.nextInt(STORED_MAX_DELAY_MS + 1));
@@ -67,8 +67,8 @@ public class Protocol {
         server.mc.sendMessage(message);
     }
 
-    public static void getchunk(String file_id, int chunk_num) throws IOException {
-        ProtocolMessage message = new ProtocolMessage("STORED", server.server_id, file_id, chunk_num, 0, null, 0);
+    public static void getchunk(ChunkId chunk_id) throws IOException {
+        ProtocolMessage message = new ProtocolMessage("GETCHUNK", server.server_id, chunk_id.file_id, chunk_id.chunk_no, 0, null, 0);
         server.mdb.sendMessage(message);
     }
 }

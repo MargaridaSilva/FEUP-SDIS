@@ -16,7 +16,6 @@ class TestApp {
     public TestApp(String peer_ap) throws RemoteException, NotBoundException {
         this.peer_ap = peer_ap;
         this.registry = LocateRegistry.getRegistry(null);
-        System.out.println(peer_ap);
         this.stub = (Peer) registry.lookup(peer_ap);
     }
 
@@ -34,6 +33,9 @@ class TestApp {
                 int replication = Integer.parseInt(args[3]);
                 testapp.backup(file_name, replication);
                 break;
+            case "STATE":
+                testapp.state();
+                break;
         }
     }
 
@@ -45,5 +47,14 @@ class TestApp {
             e.printStackTrace();
         }
     }
-    
+
+    private void state() {
+        try {
+            String response = this.stub.state();
+            System.out.println(response);
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 };

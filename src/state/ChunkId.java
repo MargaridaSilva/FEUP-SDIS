@@ -1,4 +1,4 @@
-package server;
+package state;
 
 public class ChunkId {
     public String file_id;
