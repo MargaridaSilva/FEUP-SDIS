@@ -170,10 +170,11 @@ class Server implements Peer {
             server.printInfo();
             Peer stub = (Peer) UnicastRemoteObject.exportObject(server, 0);
 
-            Registry registry = LocateRegistry.createRegistry(1099);
+            Registry registry = LocateRegistry.getRegistry(null);
             registry.bind(service_ap, stub);           
 
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

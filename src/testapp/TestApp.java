@@ -16,16 +16,14 @@ class TestApp {
     public TestApp(String peer_ap) throws RemoteException, NotBoundException {
         this.peer_ap = peer_ap;
         this.registry = LocateRegistry.getRegistry(null);
-        this.stub = (Peer) registry.lookup(peer_ap);
+        this.stub = (Peer) registry.lookup(this.peer_ap);
     }
 
     public static void main(String[] args) throws RemoteException, NotBoundException {
-
-        int peer_ap = Integer.parseInt(args[0]);
-        String peer_ap_str = args[0];
+        String peer_ap = args[0];
         String sub_protocol = new String(args[1]).toUpperCase();
 
-        TestApp testapp = new TestApp(peer_ap_str);
+        TestApp testapp = new TestApp(peer_ap);
 
         switch(sub_protocol){
             case "BACKUP":
