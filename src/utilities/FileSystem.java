@@ -125,6 +125,7 @@ public class FileSystem {
                         e.printStackTrace();
                     }
                 });
+                Files.delete(directory);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
