@@ -26,11 +26,17 @@ class TestApp {
         TestApp testapp = new TestApp(peer_ap);
 
         switch(sub_protocol){
-            case "BACKUP":
-                String file_name = args[2];
+            case "BACKUP":{
+                String filename = args[2];
                 int replication = Integer.parseInt(args[3]);
-                testapp.backup(file_name, replication);
+                testapp.backup(filename, replication);
                 break;
+            }
+            case "DELETE":{
+                String filename = args[2];
+                testapp.delete(filename);
+                break;
+            }
             case "STATE":
                 testapp.state();
                 break;
@@ -40,11 +46,24 @@ class TestApp {
     private void backup(String filename, int replication) {
         try {
             String response = this.stub.backup(filename, replication);
+            System.out.println("Backup: " + response);
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
+
+
+    private void delete(String filename) {
+        try {
+            String response = this.stub.delete(filename);
+            System.out.println("Delete: " + response);
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
 
     private void state() {
         try {

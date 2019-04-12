@@ -73,7 +73,6 @@ class Server implements Peer {
         try{
             InputStream in_file = new FileInputStream(Utilities.FILES_DIR + filename);
             String file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
-            ServerState.backup_log(filename, file_id, replication);
 
             int readBytes = 0;
             byte[] bytes = new byte[Utilities.CHUNK_SIZE];
@@ -82,11 +81,12 @@ class Server implements Peer {
             while ((readBytes = in_file.read(bytes, 0, Utilities.CHUNK_SIZE)) != -1) {
                 ChunkId chunk_id = new ChunkId(file_id, i);
                 Protocol.putchunk(chunk_id, replication, bytes, readBytes);
-                ServerState.backup_chunk_log(chunk_id);
                 i++;
             }
 
             in_file.close();
+
+            ServerState.backup_log(filename, file_id, replication, i);
 
         }catch(Exception e){
             e.printStackTrace();
@@ -103,7 +103,8 @@ class Server implements Peer {
     	
     	String file_id;
 		try {
-			file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
+            file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
+            
 			for(int i = 0; i < n_chunks; i++) {
 	    		try {
 					Protocol.getchunk(new ChunkId(file_id, i));
@@ -119,13 +120,15 @@ class Server implements Peer {
 
     @Override
     public String delete(String filename) throws RemoteException {
-    	try {
-			String file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	return filename;
+        try{
+            String file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
+            Protocol.delete(file_id);
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return "OK";
 
     }
 

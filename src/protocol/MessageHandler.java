@@ -73,11 +73,9 @@ public class MessageHandler implements Runnable {
 	}
 	
 	private void handle_delete(ProtocolMessage message) {
-		/*if(message.sender_id == ServerInfo.getInstance().server_id){
-			return;
-		}*/
-
+		System.out.println("Received delete");
 		FileSystem.getInstance().delete_file(message.file_id);
+		ServerState.remove_file(message.file_id);
 	}
 	
 	private void handle_removed(ProtocolMessage message) {

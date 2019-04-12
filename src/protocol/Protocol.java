@@ -69,6 +69,11 @@ public class Protocol {
 
     public static void getchunk(ChunkId chunk_id) throws IOException {
         ProtocolMessage message = new ProtocolMessage("GETCHUNK", server.server_id, chunk_id.file_id, chunk_id.chunk_no, 0, null, 0);
-        server.mdb.sendMessage(message);
+        server.mc.sendMessage(message);
     }
+
+	public static void delete(String file_id) throws IOException {
+        ProtocolMessage message = new ProtocolMessage("DELETE", server.server_id, file_id, 0, 0, null, 0);
+        server.mc.sendMessage(message);
+	}   
 }

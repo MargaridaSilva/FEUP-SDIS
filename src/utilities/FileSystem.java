@@ -111,17 +111,25 @@ public class FileSystem {
     }
     
     public void delete_file(String file_id) {
+
         String file_path = this.backup_path + file_id;
         
-    	Path directory = Paths.get(file_path);
-
-        if (Files.exists(directory) && Files.isDirectory(directory))
-			try {
-				Files.delete(directory);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+        Path directory = Paths.get(file_path);
+        if (Files.exists(directory) && Files.isDirectory(directory)){
+            try {
+                Files.walk(directory).forEach(p -> {
+                    try {
+                        Files.delete(p);
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                });
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
     }
 
 
