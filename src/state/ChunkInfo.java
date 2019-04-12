@@ -16,7 +16,8 @@ public class ChunkInfo {
             "File id: " + id.file_id + "\n" + 
             "Chunk no.: " + id.chunk_no + "\n" + 
             "Size no.: " + size + " KByte\n" + 
-            "Perceived replication degree: " + ServerState.get_ack_num(id) + "\n";
+            "Perceived replication degree: " + ServerState.get_ack_num(id) + "\n"+
+            "------------------------------------------";
 
         return to_string;
     }

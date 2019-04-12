@@ -22,10 +22,13 @@ public class FileInfo {
             "Chunks: " + "\n";
 
 
+        to_string += "Chunk no." + "\t" + "Perceived replication" + "\n";
         for (int i = 0; i < chunk_num; i++) {
             ChunkId chunk_id = new ChunkId(file_id, i);
-            to_string += chunk_num + "\t" + ServerState.get_ack_num(chunk_id) + "\n"; 
+            to_string += i + "\t\t\t" + ServerState.get_ack_num(chunk_id) + "\n"; 
         }
+
+        to_string += "------------------------------------------";
         return to_string;
     }
 }

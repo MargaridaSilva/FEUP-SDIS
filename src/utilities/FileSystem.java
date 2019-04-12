@@ -1,11 +1,13 @@
 package utilities;
 
+import java.io.File;
 import java.io.FileOutputStream;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.HashMap;
 
 
@@ -117,15 +119,10 @@ public class FileSystem {
         Path directory = Paths.get(file_path);
         if (Files.exists(directory) && Files.isDirectory(directory)){
             try {
-                Files.walk(directory).forEach(p -> {
-                    try {
-                        Files.delete(p);
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                });
-                Files.delete(directory);
+                Files.walk(directory)
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

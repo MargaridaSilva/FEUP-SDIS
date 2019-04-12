@@ -2,7 +2,6 @@ package state;
 
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerState implements Serializable{
@@ -32,7 +31,12 @@ public class ServerState implements Serializable{
 
     public static int get_ack_num(ChunkId chunk_id) {
         HashSet<Integer> servers_ack = perceived_replication.get(chunk_id);
-        return servers_ack.size();
+        if(servers_ack != null){
+            return servers_ack.size();
+        }
+        else{
+            return 0;
+        }
     }
 
     public static void remove_chunk(ChunkId chunk_id){
@@ -40,7 +44,8 @@ public class ServerState implements Serializable{
     }
     
     public static void remove_file(String file_id){
-        perceived_replication.entrySet().removeIf(entries->entries.getKey().file_id == file_id);
+        perceived_replication.entrySet().removeIf(entries->entries.getKey().file_id.equals(file_id));
+        store_log.entrySet().removeIf(entries->entries.getKey().file_id.equals(file_id));
     }
 
 
