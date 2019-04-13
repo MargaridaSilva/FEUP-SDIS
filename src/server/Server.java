@@ -95,22 +95,20 @@ class Server implements Peer {
         return "OK";
     }
 
+    /*
+    #TODO:
+        - O unico a gravar chunk na pasta restored deve ser quem enviou a mensagem getchunk.
+        - Verificar se algum outro server já enviou um chunk, se afirmativo não precisa de enviar.
+    */
     @Override
     public String restore(String filename) throws RemoteException {
-    	//TO REFACTOR WITH DATA STRUCTURE
-    	int n_chunks = 3;
-    	
-    	
-    	String file_id;
+
 		try {
-            file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
-            
-			for(int i = 0; i < n_chunks; i++) {
-	    		try {
-					Protocol.getchunk(new ChunkId(file_id, i));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+            String file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
+            int num_chunks = ServerState.get_num_chunks(file_id);
+
+			for(int i = 0; i < num_chunks; i++) {
+				Protocol.getchunk(new ChunkId(file_id, i));
 	    	}
 		} catch (Exception e) {
 			e.printStackTrace();

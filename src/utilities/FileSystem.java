@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
-import java.util.HashMap;
 
 
 public class FileSystem {
@@ -27,7 +26,6 @@ public class FileSystem {
         return fs; 
     } 
 
-    private HashMap<String, String> filepath_id_map;
     private int server_id;
     String server_path;
     String backup_path;
@@ -38,16 +36,6 @@ public class FileSystem {
         this.server_path = Utilities.LOCALDISK_DIR + this.server_id + "/";
         this.backup_path = this.server_path + "backup/";
         this.restored_path = this.server_path + "restored/";
-
-        this.filepath_id_map = new HashMap<>();
-    }
-
-    public void put(String key, String value) {
-        filepath_id_map.put(key, value);
-    }
-
-    public String get(String key) {
-        return filepath_id_map.get(key);
     }
 
     public void createPeerFileStructure() {
@@ -62,9 +50,9 @@ public class FileSystem {
         }
     }
 
-    public void create_file_dir(String file_id) {
+    public void create_file_dir(String file_id, String path) {
 
-        String new_path = this.backup_path + file_id;
+        String new_path = path + file_id;
         if(Files.notExists(Paths.get(new_path))){
             try {
                 Files.createDirectories(Paths.get(new_path));
@@ -84,12 +72,37 @@ public class FileSystem {
         return restored_path;
     }
 
-    public void save_chunk(String file_id, int chunk_no, byte[] bytes, int size) {
-        create_file_dir(file_id);
+    public byte[] read_chunk(String file_id, int chunk_no){
+        Path file = Paths.get(this.backup_path + file_id + "/" + chunk_no);
+        
+        try {
+            byte[] file_content;
+            file_content = Files.readAllBytes(file);
+            return file_content;
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return null;
+        
+    }
+
+
+    public void save_chunk_backup(String file_id, int chunk_no, byte[] bytes, int size){
+        save_chunk(file_id, chunk_no, bytes, size, this.backup_path);
+    }
+
+    public void save_chunk_restore(String file_id, int chunk_no, byte[] bytes, int size){
+        save_chunk(file_id, chunk_no, bytes, size, this.restored_path);
+    }
+
+    public void save_chunk(String file_id, int chunk_no, byte[] bytes, int size, String path) {
+        create_file_dir(file_id, path);
 
         FileOutputStream fos;
         try {
-            String filepath = this.backup_path + file_id + "/" + chunk_no;
+            String filepath = path + file_id + "/" + chunk_no;
             fos = new FileOutputStream(filepath);
             fos.write(bytes, 0, size);
             fos.close();

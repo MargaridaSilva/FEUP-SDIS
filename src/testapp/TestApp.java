@@ -32,6 +32,11 @@ class TestApp {
                 testapp.backup(filename, replication);
                 break;
             }
+            case "RESTORE":{
+                String filename = args[2];
+                testapp.restore(filename);
+                break;
+            }
             case "DELETE":{
                 String filename = args[2];
                 testapp.delete(filename);
@@ -43,10 +48,21 @@ class TestApp {
         }
     }
 
+
     private void backup(String filename, int replication) {
         try {
             String response = this.stub.backup(filename, replication);
             System.out.println("Backup: " + response);
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    private void restore(String filename) {
+        try {
+            String response = this.stub.restore(filename);
+            System.out.println("Restore: " + response);
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

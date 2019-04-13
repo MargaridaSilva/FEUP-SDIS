@@ -12,6 +12,13 @@ public class FileInfo {
         this.replication_deg = replication_deg;
         this.chunk_num = chunk_num;
     }
+    
+    /**
+     * @return the chunk_num
+     */
+    public int get_chunk_num() {
+        return chunk_num;
+    }
 
     @Override
     public String toString() {

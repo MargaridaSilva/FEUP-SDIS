@@ -48,7 +48,7 @@ public class MessageHandler implements Runnable {
 		}
 
 		ChunkId chunk_id =  new ChunkId(message.file_id, message.chunk_num);
-		FileSystem.getInstance().save_chunk(message.file_id, message.chunk_num, message.body, message.body_len);
+		FileSystem.getInstance().save_chunk_backup(message.file_id, message.chunk_num, message.body, message.body_len);
 		ServerState.store_log(chunk_id, message.body_len);
 		try {
 			Protocol.stored(chunk_id);
@@ -63,13 +63,18 @@ public class MessageHandler implements Runnable {
 	}	
 	
 	private void handle_getchunk(ProtocolMessage message) {
-		
-		
+		ChunkId chunk_id =  new ChunkId(message.file_id, message.chunk_num);
+		byte[] body = FileSystem.getInstance().read_chunk(message.file_id, message.chunk_num);
+		try {
+			Protocol.chunk(chunk_id, body, body.length);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void handle_chunk(ProtocolMessage message) {
 		System.out.println("Received Chunk");
-		
+		FileSystem.getInstance().save_chunk_restore(message.file_id, message.chunk_num, message.body, message.body_len);
 	}
 	
 	private void handle_delete(ProtocolMessage message) {

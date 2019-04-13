@@ -39,6 +39,11 @@ public class ServerState implements Serializable{
         }
     }
 
+    public static int get_num_chunks(String file_id){
+        FileInfo info = backup_log.get(file_id);
+        return info.get_chunk_num();
+    }
+
     public static void remove_chunk(ChunkId chunk_id){
         perceived_replication.remove(chunk_id);
     }
