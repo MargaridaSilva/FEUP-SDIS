@@ -40,9 +40,9 @@ public class Protocol {
         do {
             server.mdb.sendMessage(message);
             try {
-                System.out.println("Going to sleep...");
+                System.out.println("Going to sleep for " + wait_time + " ms\n");
                 Thread.sleep(wait_time);
-                System.out.println("After sleep: " + wait_time + " ms");
+                System.out.println("After sleep " + wait_time + " ms\n");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -71,23 +71,27 @@ public class Protocol {
         ProtocolMessage message = new ProtocolMessage("GETCHUNK", server.server_id, chunk_id.file_id, chunk_id.chunk_no,
                 0, null, 0);
         server.mc.sendMessage(message);
+        ServerState.getchunk_log(chunk_id);
     }
 
-    public static void chunk(ChunkId chunk_id, byte[] bytes, int readBytes) throws IOException {
+    public static void chunk(ChunkId chunk_id, byte[] bytes, int readBytes) {
 
         ProtocolMessage message = new ProtocolMessage("CHUNK", server.server_id, chunk_id.file_id, chunk_id.chunk_no, 0,
                 bytes, readBytes);
 
         Random rand = new Random();
-        
+
         long wait_time = rand.nextInt(CHUNK_MAX_DELAY_MS + 1);
 
         TimerTask task = new TimerTask() {
             public void run() {
-                try {
-                    server.mdr.sendMessage(message);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (ServerState.is_getchunk_pendent(chunk_id)) {
+                    ServerState.getchunk_delete(chunk_id);
+                    try {
+                        server.mdr.sendMessage(message);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         };

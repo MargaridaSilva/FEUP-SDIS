@@ -64,7 +64,8 @@ class Server implements Peer {
     }
 
     private void printInfo() {
-        System.out.println("Server: " + this.server_id);
+        System.out.println("Server " + this.server_id + " is now running.");
+        System.out.println("---------------------------------------------\n\n");
     }
 
     @Override   
@@ -94,12 +95,7 @@ class Server implements Peer {
 
         return "OK";
     }
-
-    /*
-    #TODO:
-        - O unico a gravar chunk na pasta restored deve ser quem enviou a mensagem getchunk.
-        - Verificar se algum outro server já enviou um chunk, se afirmativo não precisa de enviar.
-    */
+    
     @Override
     public String restore(String filename) throws RemoteException {
 

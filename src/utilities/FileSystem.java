@@ -72,18 +72,23 @@ public class FileSystem {
         return restored_path;
     }
 
+
+    public boolean contain_chunk(String file_id, int chunk_no){
+        Path file = Paths.get(this.backup_path + file_id + "/" + chunk_no);
+        return Files.exists(file);        
+    }
+
     public byte[] read_chunk(String file_id, int chunk_no){
         Path file = Paths.get(this.backup_path + file_id + "/" + chunk_no);
-        
-        try {
-            byte[] file_content;
-            file_content = Files.readAllBytes(file);
-            return file_content;
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        if(Files.exists(file)){
+            try {
+                byte[] file_content;
+                file_content = Files.readAllBytes(file);
+                return file_content;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-
         return null;
         
     }

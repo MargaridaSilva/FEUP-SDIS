@@ -9,36 +9,48 @@ import utilities.Utilities;
 public class ProtocolMessage {
 	public static String version = "1.0";
     public static enum Type { PUTCHUNK, STORED, GETCHUNK, CHUNK, DELETE, REMOVED};
+    public static final String FINAL_SEQ = "\r\n\r\n";
     
-    public String file_id, message;
+    public String file_id;
     public int sender_id, chunk_num, replication, buf_len, body_len;
     public byte[] buf, body;
 	public ProtocolMessage.Type type;
 
-    public static final String FINAL_SEQ = "\r\n\r\n";
 
-    public ProtocolMessage(byte[] packet) {
+    public ProtocolMessage(byte[] packet) throws Exception {
 
-        buf = packet;
-        buf_len = packet.length;
-        String header = "";
+        this.buf = packet;
+        this.buf_len = packet.length;
 
         int index = Utilities.indexSeq(buf, FINAL_SEQ.getBytes());
+        if (index == -1) {
+            throw new Exception();
+        }
 
-        if (index != -1) {
-            byte[] header_bytes = Arrays.copyOfRange(buf, 0, index - 1);
-            header = new String(header_bytes);
-            body = Arrays.copyOfRange(buf, index + FINAL_SEQ.length(), buf_len);
-            body_len = body.length;
-            this.processHeader(header);
-        }
-        else{
-            //Throw Error
-        }
+        this.body = Arrays.copyOfRange(buf, index + FINAL_SEQ.length(), this.buf_len);
+        this.body_len = body.length;
+        
+        byte[] header_bytes = Arrays.copyOfRange(buf, 0, index - 1);
+        String header = new String(header_bytes);
+        String[] args = header.split(" ");
+
+    	this.sender_id = Integer.parseInt(args[2]);
+    	this.file_id = args[3];
+        this.type = getType(args[0]);
+        this.chunk_num = Integer.parseInt(args[4]);
+        this.replication = Integer.parseInt(args[5]);
     }
 
     public ProtocolMessage(String sub_protocol, int sender_id, String file_id, int chunk_num, int replication, byte[] body, int body_len) {
 
+        this.file_id = file_id;
+        this.sender_id = sender_id;
+        this.chunk_num = chunk_num;
+        this.replication = replication;
+        this.body = body;
+        this.body_len = body_len;
+        this.type = getType(sub_protocol);
+    
         String header = String.join(" ", sub_protocol, ProtocolMessage.version, String.valueOf(sender_id), file_id, String.valueOf(chunk_num),
                 String.valueOf(replication), FINAL_SEQ);
         
@@ -57,12 +69,8 @@ public class ProtocolMessage {
             e.printStackTrace();
         }
 
-        buf = outputStream.toByteArray();
-        buf_len = buf.length;
-    }
-
-    public String toString() {
-        return message;
+        this.buf = outputStream.toByteArray();
+        this.buf_len = buf.length;
     }
     
     public boolean isEmptyHeader(String header) {
@@ -72,35 +80,33 @@ public class ProtocolMessage {
     public void printMessageInfo() {
     	System.out.println("Type: "+ this.type);
     	System.out.println("Sender: "+this.sender_id);
-    	System.out.println("File: "+ this.file_id);
+        System.out.println("File: "+ this.file_id);
     }
     
+    public Type getType(String type){
+        switch(type) {
+            case "PUTCHUNK":
+                return Type.PUTCHUNK;
+            case "STORED":
+                return Type.STORED;
+            case "GETCHUNK":
+                return Type.GETCHUNK;
+            case "CHUNK":
+                return  Type.CHUNK;
+            case "DELETE":
+                return Type.DELETE;
+            case "REMOVED":
+                return Type.REMOVED;
+           default:
+               return null;
+            }
+    }
+
     public void processHeader(String header) {
     	String[] args = header.split(" ");
     	this.sender_id = Integer.parseInt(args[2]);
     	this.file_id = args[3];
-        switch(args[0]) {
-		 case "PUTCHUNK":
-			 this.type = Type.PUTCHUNK;
-			 break;
-		 case "STORED":
-			 this.type = Type.STORED;
-			 break;
-		 case "GETCHUNK":
-			 this.type = Type.GETCHUNK;
-			 break;
-		 case "CHUNK":
-			 this.type = Type.CHUNK;
-			 break;
-		 case "DELETE":
-			 this.type = Type.DELETE;
-			 break;
-		 case "REMOVED":
-			 this.type = Type.REMOVED;
-			 break;
-		default:
-			System.out.println("INVALID MESSAGE TYPE");
-		 }
+        this.type = getType(args[0]);
         if (this.type != Type.DELETE) {
         	this.chunk_num = Integer.parseInt(args[4]);
         	if (this.type == Type.PUTCHUNK)

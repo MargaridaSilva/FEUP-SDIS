@@ -2,6 +2,7 @@ package state;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerState implements Serializable{
@@ -10,11 +11,19 @@ public class ServerState implements Serializable{
     //chunk store confirmation
     private static ConcurrentHashMap<ChunkId, HashSet<Integer>> perceived_replication = new ConcurrentHashMap<>();
     
+    //Chunk requests this server receives
+    private static Set<ChunkId> pending_getchunk = ConcurrentHashMap.newKeySet();
+
+
+
     //file whose backup this server has initiated
     private static ConcurrentHashMap<String, FileInfo> backup_log = new ConcurrentHashMap<>();
 
     //chunk this server stores
     private static ConcurrentHashMap<ChunkId, ChunkInfo> store_log = new ConcurrentHashMap<>();
+
+    //chunk this server requests
+    private static Set<ChunkId> getchunk_log = ConcurrentHashMap.newKeySet();
     
 
 
@@ -54,6 +63,23 @@ public class ServerState implements Serializable{
     }
 
 
+
+
+    public static void getchunk_request(ChunkId chunk_id){
+        pending_getchunk.add(chunk_id);
+    }
+
+    public static void getchunk_delete(ChunkId chunk_id) {
+        pending_getchunk.remove(chunk_id);
+	}
+
+    public static boolean is_getchunk_pendent(ChunkId chunk_id){
+        return pending_getchunk.contains(chunk_id);
+    }
+
+    
+
+
 	public static void backup_log(String filename, String file_id, int replication_deg, int chunk_num) {
         FileInfo file_info = new FileInfo(filename, file_id, replication_deg, chunk_num);
         backup_log.put(file_id, file_info);
@@ -68,6 +94,20 @@ public class ServerState implements Serializable{
         }
 
         return info;
+    }
+
+
+
+    public static void getchunk_log(ChunkId chunk_id){
+        getchunk_log.add(chunk_id);
+    }
+
+    public static boolean getchunk_requested(ChunkId chunk_id){
+        return getchunk_log.contains(chunk_id);
+    }
+
+    public static void getchunk_handled(ChunkId chunk_id) {
+        getchunk_log.remove(chunk_id);
     }
 
 

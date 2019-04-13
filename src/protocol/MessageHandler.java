@@ -18,8 +18,18 @@ public class MessageHandler implements Runnable {
 
 	@Override
 	public void run() {
-		ProtocolMessage message = new ProtocolMessage(this.packet);
+		ProtocolMessage message;
+		
+		try {
+			message = new ProtocolMessage(this.packet);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
+
+		System.out.println("Message received");
 		message.printMessageInfo();
+		System.out.println();
 		switch (message.type) {
 		case PUTCHUNK:
 			handle_putchunk(message);
@@ -63,22 +73,33 @@ public class MessageHandler implements Runnable {
 	}	
 	
 	private void handle_getchunk(ProtocolMessage message) {
+		if(message.sender_id == ServerInfo.getInstance().server_id){
+			return;
+		}
+
 		ChunkId chunk_id =  new ChunkId(message.file_id, message.chunk_num);
 		byte[] body = FileSystem.getInstance().read_chunk(message.file_id, message.chunk_num);
-		try {
+
+		if(FileSystem.getInstance().contain_chunk(message.file_id, message.chunk_num)){
+			ServerState.getchunk_request(chunk_id);
 			Protocol.chunk(chunk_id, body, body.length);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} 
 	}
 	
 	private void handle_chunk(ProtocolMessage message) {
 		System.out.println("Received Chunk");
-		FileSystem.getInstance().save_chunk_restore(message.file_id, message.chunk_num, message.body, message.body_len);
+		ChunkId chunk_id =  new ChunkId(message.file_id, message.chunk_num);
+		
+		if(ServerState.getchunk_requested(chunk_id)){
+			FileSystem.getInstance().save_chunk_restore(message.file_id, message.chunk_num, message.body, message.body_len);
+			ServerState.getchunk_handled(chunk_id);
+		}else{
+			ServerState.getchunk_delete(chunk_id);
+		}
+
 	}
 	
 	private void handle_delete(ProtocolMessage message) {
-		System.out.println("Received delete");
 		FileSystem.getInstance().delete_file(message.file_id);
 		ServerState.remove_file(message.file_id);
 	}

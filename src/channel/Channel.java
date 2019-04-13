@@ -36,13 +36,15 @@ public class Channel implements Runnable {
     }
 
     public void sendMessage(ProtocolMessage message) throws IOException {
+        System.out.println("Message sent");
+        message.printMessageInfo();
+        System.out.println("");
         DatagramPacket packet = new DatagramPacket(message.buf, message.buf_len, this.inet_addr, this.port);
         this.socket.send(packet);
     }
 
     @Override
     public void run() {
-        System.out.println("Listening...");
         byte[] buf = new byte[Utilities.UDP_MAX];
         DatagramPacket recv = new DatagramPacket(buf, buf.length);
         while(!Thread.interrupted()){
