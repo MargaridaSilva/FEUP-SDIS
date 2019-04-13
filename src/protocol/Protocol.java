@@ -20,7 +20,7 @@ public class Protocol {
 
     public static void putchunk(ChunkId chunk_id, int replication, byte[] bytes, int readBytes) throws IOException {
 
-        ProtocolMessage message = new ProtocolMessage("PUTCHUNK", server.server_id, chunk_id.file_id, chunk_id.chunk_no,
+        ProtocolMessage message = new ProtocolMessage("PUTCHUNK", server.protocol_ver, server.server_id, chunk_id.file_id, chunk_id.chunk_no,
                 replication, bytes, readBytes);
 
         // TimerTask task = new TimerTask() {
@@ -56,7 +56,7 @@ public class Protocol {
     }
 
     public static void stored(ChunkId chunk_id) throws IOException {
-        ProtocolMessage message = new ProtocolMessage("STORED", server.server_id, chunk_id.file_id, chunk_id.chunk_no,
+        ProtocolMessage message = new ProtocolMessage("STORED", server.protocol_ver, server.server_id, chunk_id.file_id, chunk_id.chunk_no,
                 0, null, 0);
         Random rand = new Random();
         try {
@@ -68,7 +68,7 @@ public class Protocol {
     }
 
     public static void getchunk(ChunkId chunk_id) throws IOException {
-        ProtocolMessage message = new ProtocolMessage("GETCHUNK", server.server_id, chunk_id.file_id, chunk_id.chunk_no,
+        ProtocolMessage message = new ProtocolMessage("GETCHUNK", server.protocol_ver, server.server_id, chunk_id.file_id, chunk_id.chunk_no,
                 0, null, 0);
         server.mc.sendMessage(message);
         ServerState.getchunk_log(chunk_id);
@@ -76,7 +76,7 @@ public class Protocol {
 
     public static void chunk(ChunkId chunk_id, byte[] bytes, int readBytes) {
 
-        ProtocolMessage message = new ProtocolMessage("CHUNK", server.server_id, chunk_id.file_id, chunk_id.chunk_no, 0,
+        ProtocolMessage message = new ProtocolMessage("CHUNK", server.protocol_ver, server.server_id, chunk_id.file_id, chunk_id.chunk_no, 0,
                 bytes, readBytes);
 
         Random rand = new Random();
@@ -100,7 +100,7 @@ public class Protocol {
     }
 
     public static void delete(String file_id) throws IOException {
-        ProtocolMessage message = new ProtocolMessage("DELETE", server.server_id, file_id, 0, 0, null, 0);
+        ProtocolMessage message = new ProtocolMessage("DELETE", server.protocol_ver, server.server_id, file_id, 0, 0, null, 0);
         server.mc.sendMessage(message);
     }
 }

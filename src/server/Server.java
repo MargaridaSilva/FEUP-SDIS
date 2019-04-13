@@ -18,36 +18,29 @@ import channel.Channel;
 
 class Server implements Peer {
 
-    private int protocol_ver;
-    private int server_id;
-    private Channel mc;
-    private Channel mdb;
-    private Channel mdr;
+    private ServerInfo server_info;
     
-    Server(int protocol_ver, int server_id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr,
+    Server(String protocol_ver, int server_id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr,
             int mdr_port)
             throws IOException {
 
 
-        this.protocol_ver = protocol_ver;
-        this.server_id = server_id;
-        FileSystem.init(this.server_id);
+        FileSystem.init(server_id);
         FileSystem.getInstance().createPeerFileStructure();
 
-        this.mc = new Channel(mc_addr, mc_port);
-        this.mdb = new Channel(mdb_addr, mdb_port);
-        this.mdr = new Channel(mdr_addr, mdr_port);
+        Channel mc = new Channel(mc_addr, mc_port);
+        Channel mdb = new Channel(mdb_addr, mdb_port);
+        Channel mdr = new Channel(mdr_addr, mdr_port);
 
-        ServerInfo.init(this.server_id, this.mc, this.mdb, this.mdr);
-
-        listenChannels();
+        ServerInfo.init(protocol_ver, server_id, mc, mdb, mdr);
+        this.server_info = ServerInfo.getInstance();
     }
 
     public void listenChannels(){
         try {
-            this.mc.startReceive();
-            this.mdb.startReceive();
-            this.mdr.startReceive();
+            this.server_info.mc.startReceive();
+            this.server_info.mdb.startReceive();
+            this.server_info.mdr.startReceive();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -55,16 +48,16 @@ class Server implements Peer {
 
     public void closeChannels() {
         try {
-            this.mc.stopReceive();
-            this.mdb.stopReceive();
-            this.mdr.stopReceive();
+            this.server_info.mc.stopReceive();
+            this.server_info.mdb.stopReceive();
+            this.server_info.mdr.stopReceive();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void printInfo() {
-        System.out.println("Server " + this.server_id + " is now running.");
+        System.out.println("Server " + this.server_info.server_id + " is now running.");
         System.out.println("---------------------------------------------\n\n");
     }
 
@@ -95,7 +88,7 @@ class Server implements Peer {
 
         return "OK";
     }
-    
+
     @Override
     public String restore(String filename) throws RemoteException {
 
@@ -140,7 +133,7 @@ class Server implements Peer {
     // protocol version, the server id, service access point, MC, MDB, MDR
     public static void main(String[] args) {
 
-        int protocol_ver = Integer.parseInt(args[0]);
+        String protocol_ver = args[0];
         int server_id = Integer.parseInt(args[1]);
         String service_ap = args[2];
 
@@ -164,6 +157,8 @@ class Server implements Peer {
 
         try {
             Server server = new Server(protocol_ver, server_id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port);
+            server.listenChannels();
+            
             server.printInfo();
             Peer stub = (Peer) UnicastRemoteObject.exportObject(server, 0);
 

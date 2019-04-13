@@ -6,8 +6,8 @@ public class ServerInfo {
     
     private static ServerInfo info = null;
 
-    public static ServerInfo init(int server_id, Channel mc, Channel mdb, Channel mdr) { 
-        info = new ServerInfo(server_id, mc, mdb, mdr); 
+    public static ServerInfo init(String protocol_ver, int server_id, Channel mc, Channel mdb, Channel mdr) { 
+        info = new ServerInfo(protocol_ver, server_id, mc, mdb, mdr); 
         return info; 
     } 
 
@@ -18,12 +18,14 @@ public class ServerInfo {
         return info; 
     } 
 
+    public String protocol_ver;
     public int server_id;
     public Channel mc;
     public Channel mdb;
     public Channel mdr;
 
-    ServerInfo(int server_id, Channel mc, Channel mdb, Channel mdr){
+    ServerInfo(String protocol_ver, int server_id, Channel mc, Channel mdb, Channel mdr){
+        this.protocol_ver = protocol_ver;
         this.server_id = server_id;
         this.mc = mc;
         this.mdb = mdb;

@@ -7,14 +7,14 @@ import java.util.Arrays;
 import utilities.Utilities;
 
 public class ProtocolMessage {
-	public static String version = "1.0";
     public static enum Type { PUTCHUNK, STORED, GETCHUNK, CHUNK, DELETE, REMOVED};
-    public static final String FINAL_SEQ = "\r\n\r\n";
+    private static final String FINAL_SEQ = "\r\n\r\n";
     
     public String file_id;
     public int sender_id, chunk_num, replication, buf_len, body_len;
     public byte[] buf, body;
-	public ProtocolMessage.Type type;
+    public ProtocolMessage.Type type;
+	public String version;
 
 
     public ProtocolMessage(byte[] packet) throws Exception {
@@ -41,7 +41,7 @@ public class ProtocolMessage {
         this.replication = Integer.parseInt(args[5]);
     }
 
-    public ProtocolMessage(String sub_protocol, int sender_id, String file_id, int chunk_num, int replication, byte[] body, int body_len) {
+    public ProtocolMessage(String sub_protocol, String version, int sender_id, String file_id, int chunk_num, int replication, byte[] body, int body_len) {
 
         this.file_id = file_id;
         this.sender_id = sender_id;
@@ -51,7 +51,7 @@ public class ProtocolMessage {
         this.body_len = body_len;
         this.type = getType(sub_protocol);
     
-        String header = String.join(" ", sub_protocol, ProtocolMessage.version, String.valueOf(sender_id), file_id, String.valueOf(chunk_num),
+        String header = String.join(" ", sub_protocol, version, String.valueOf(sender_id), file_id, String.valueOf(chunk_num),
                 String.valueOf(replication), FINAL_SEQ);
         
         byte[] header_bytes = header.getBytes();
