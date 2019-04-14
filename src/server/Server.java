@@ -15,6 +15,7 @@ import java.rmi.registry.Registry;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
 import utilities.Utilities;
 import utilities.FileSystem;
 import channel.Channel;
@@ -28,7 +29,6 @@ class Server implements Peer {
             int mdr_port)
             throws IOException {
 
-
         FileSystem.init(server_id);
         FileSystem.getInstance().createPeerFileStructure();
 
@@ -39,9 +39,10 @@ class Server implements Peer {
         ServerInfo.init(protocol_ver, server_id, mc, mdb, mdr);
         this.server_info = ServerInfo.getInstance();
         
+        
     	if (server_backup == null) {
     		server_backup = Executors.newSingleThreadExecutor();
-    		server_backup.execute(new ServerBackup());
+    		server_backup.execute(new ServerBackup(server_id));
     	}
     }
 
@@ -188,6 +189,5 @@ class Server implements Peer {
             e.printStackTrace();
         }
     }
-
  
 }

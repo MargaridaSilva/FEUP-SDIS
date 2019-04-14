@@ -18,8 +18,6 @@ public class ServerState implements Externalizable{
     //Chunk requests this server receives
     private static Set<ChunkId> pending_getchunk = ConcurrentHashMap.newKeySet();
 
-
-
     //file whose backup this server has initiated
     private static ConcurrentHashMap<String, FileInfo> backup_log = new ConcurrentHashMap<>();
 
@@ -138,6 +136,8 @@ public class ServerState implements Externalizable{
         return info;
         
     }
+
+   
 
 	@SuppressWarnings("unchecked")
 	@Override
