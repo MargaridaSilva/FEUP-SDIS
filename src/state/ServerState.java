@@ -142,11 +142,11 @@ public class ServerState implements Externalizable{
 	@SuppressWarnings("unchecked")
 	@Override
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-		getchunk_log =  (Set<ChunkId>) in.readObject();
-		store_log =  (ConcurrentHashMap<ChunkId, ChunkInfo>) in.readObject();
-		backup_log =  (ConcurrentHashMap<String, FileInfo>) in.readObject();
-		pending_getchunk =  (Set<ChunkId>) in.readObject();
 		perceived_replication = (ConcurrentHashMap<ChunkId, HashSet<Integer>>) in.readObject();
+		pending_getchunk =  (Set<ChunkId>) in.readObject();
+		backup_log =  (ConcurrentHashMap<String, FileInfo>) in.readObject();
+		store_log =  (ConcurrentHashMap<ChunkId, ChunkInfo>) in.readObject();
+		getchunk_log =  (Set<ChunkId>) in.readObject();
 	}
 
 	@Override

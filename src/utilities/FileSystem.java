@@ -98,8 +98,9 @@ public class FileSystem {
                 e.printStackTrace();
             }
         }
+        else System.out.println("WARNING: Access to illegal chunk no." + chunk_no + " of file " + file_id);
         return null;
-
+        
     }
 
     public void join_chunk(String file_id, String filename) {
@@ -184,7 +185,6 @@ public class FileSystem {
                     .map(Path::toFile)
                     .forEach(File::delete);
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
