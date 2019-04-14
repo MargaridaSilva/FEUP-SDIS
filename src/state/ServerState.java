@@ -30,7 +30,8 @@ public class ServerState implements Externalizable{
     //chunk this server requests
     private static  Set<ChunkId> getchunk_log = ConcurrentHashMap.newKeySet();
     
-
+    //lease log
+    private static ConcurrentHashMap<String, Boolean> pending_leases = new ConcurrentHashMap<>();
 
     //---------------------
     //Perceived Replication
@@ -215,6 +216,23 @@ public class ServerState implements Externalizable{
         
     }
 
+    public static void start_leasing(String file_id) {
+    	//insert and update if needed
+    	pending_leases.put(file_id, false);
+    }
+    
+    public static void stop_leasing(String file_id) {
+    	//insert and update if needed
+    	pending_leases.remove(file_id);
+    }
+    
+    public static void confirm_lease(String file_id) {
+    	if (!pending_leases.containsKey(file_id))
+    		pending_leases.put(file_id, true);
+    }
+    public static boolean is_leased(String file_id) {
+    	return pending_leases.getOrDefault(file_id, false);
+    }
    
 
 	@SuppressWarnings("unchecked")
@@ -225,6 +243,7 @@ public class ServerState implements Externalizable{
 		backup_log =  (ConcurrentHashMap<String, FileInfo>) in.readObject();
 		store_log =  (ConcurrentHashMap<ChunkId, ChunkInfo>) in.readObject();
 		getchunk_log =  (Set<ChunkId>) in.readObject();
+		pending_leases = (ConcurrentHashMap<String, Boolean>) in.readObject();
 	}
 
 	@Override
@@ -234,6 +253,7 @@ public class ServerState implements Externalizable{
 		out.writeObject(backup_log);
 		out.writeObject(store_log);
 		out.writeObject(getchunk_log);
+		out.writeObject(pending_leases);
 		
 	}
 }

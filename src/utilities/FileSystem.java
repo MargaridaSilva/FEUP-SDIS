@@ -188,6 +188,8 @@ public class FileSystem {
                 e.printStackTrace();
             }
         }
+        
+        ServerState.remove_file(file_id);
     }
     
     public void save_server_state(ServerState state) {
@@ -234,5 +236,11 @@ public class FileSystem {
     		}
     	}
 		
+	}
+	
+	public boolean hasFile(String file_id) {
+		String backup_path = this.backup_path + file_id;
+		Path path = Paths.get(backup_path);
+		return Files.exists(path);
 	}
 }

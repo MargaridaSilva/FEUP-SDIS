@@ -48,9 +48,33 @@ public class MessageHandler implements Runnable {
 			break;
 		case REMOVED:
 			handle_removed(message);
+		case LEASE:
+			handle_lease(message);
+		case LEASED:
+			handle_leased(message);
+		default: break;
 		}
 	}
 
+
+	private void handle_leased(ProtocolMessage message) {
+		if (message.sender_id == ServerInfo.getInstance().server_id) {
+			ServerState.confirm_lease(message.file_id);
+		}
+			
+		
+	}
+
+	private void handle_lease(ProtocolMessage message) {
+		if (FileSystem.getInstance().hasFile(message.file_id)) {
+			try {
+				Protocol.leased(message.file_id);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
 
 	private void handle_putchunk(ProtocolMessage message) {
 		if(message.sender_id == ServerInfo.getInstance().server_id || 
@@ -110,7 +134,6 @@ public class MessageHandler implements Runnable {
 	
 	private void handle_delete(ProtocolMessage message) {
 		FileSystem.getInstance().delete_file(message.file_id);
-		ServerState.remove_file(message.file_id);
 	}
 
 	
