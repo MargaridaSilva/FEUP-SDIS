@@ -1,7 +1,17 @@
 package state;
 
-public class ChunkId {
-    public String file_id;
+import java.io.Serializable;
+
+public class ChunkId implements Serializable {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
+	 * 
+	 */
+	
+	public String file_id;
     public int chunk_no;
 
     public ChunkId(String file_id, int chunk_no){

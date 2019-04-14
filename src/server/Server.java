@@ -2,11 +2,14 @@ package server;
 
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import protocol.Protocol;
 import state.ChunkId;
 import state.ChunkInfo;
 import state.ServerState;
+import state.ServerBackup;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -14,6 +17,7 @@ import java.rmi.registry.Registry;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
 import utilities.Utilities;
 import utilities.FileSystem;
 import channel.Channel;
@@ -21,11 +25,11 @@ import channel.Channel;
 class Server implements Peer {
 
     private ServerInfo server_info;
+    public static Executor server_backup = null;
     
     Server(String protocol_ver, int server_id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr,
             int mdr_port)
             throws IOException {
-
 
         FileSystem.init(server_id);
         FileSystem.getInstance().createPeerFileStructure();
@@ -36,6 +40,12 @@ class Server implements Peer {
 
         ServerInfo.init(protocol_ver, server_id, mc, mdb, mdr);
         this.server_info = ServerInfo.getInstance();
+        
+        
+    	if (server_backup == null) {
+    		server_backup = Executors.newSingleThreadExecutor();
+    		server_backup.execute(new ServerBackup(server_id));
+    	}
     }
 
     public void listenChannels(){
@@ -193,6 +203,5 @@ class Server implements Peer {
             e.printStackTrace();
         }
     }
-
  
 }

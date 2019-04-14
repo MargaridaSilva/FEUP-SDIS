@@ -1,10 +1,15 @@
 package state;
 
 import utilities.Utilities;
+import java.io.Serializable;
 
-public class ChunkInfo implements Comparable<ChunkInfo> {
+public class ChunkInfo implements Serializable,Comparable<ChunkInfo>{
 
-    private ChunkId id;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private ChunkId id;
     private int size;
     private int desired_replication;
 

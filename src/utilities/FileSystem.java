@@ -1,13 +1,20 @@
 package utilities;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+
+import server.ServerInfo;
+import state.ServerBackup;
+import state.ServerState;
 
 public class FileSystem {
 
@@ -90,8 +97,9 @@ public class FileSystem {
                 e.printStackTrace();
             }
         }
+        else System.out.println("WARNING: Access to illegal chunk no." + chunk_no + " of file " + file_id);
         return null;
-
+        
     }
 
     public void join_chunk(String file_id, String filename) {
@@ -176,11 +184,51 @@ public class FileSystem {
                     .map(Path::toFile)
                     .forEach(File::delete);
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
     }
+    
+    public void save_server_state(ServerState state) {
+    
+	   try {
+           FileOutputStream fos = new FileOutputStream(Utilities.SERVER_BACKUP_DIR+ServerInfo.getInstance().server_id+"/log");
+           ObjectOutputStream oos = new ObjectOutputStream(fos);
+           state.writeExternal(oos);
+           oos.close();
+           fos.close();
+       } catch (IOException e) {
+           e.printStackTrace();
+       } 
+    }
+    
 
-
+	public void createServerBackupStructure() {
+		Path path =  Paths.get(ServerBackup.path);
+		if (Files.exists(path) && Files.isDirectory(path)) {
+			load_server_state();
+		} else
+			try {
+				Files.createDirectories(path);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	}
+	
+	public void load_server_state() {
+    	ServerState state = new ServerState();
+    	System.out.println(ServerBackup.path);
+        
+ 	   try {
+            FileInputStream fis = new FileInputStream(ServerBackup.path+"/log");
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            state.readExternal(ois);
+            ois.close();
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} 
+     }
 }

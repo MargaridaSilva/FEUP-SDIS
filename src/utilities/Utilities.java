@@ -19,6 +19,7 @@ public class Utilities {
     public static int CHUNK_SIZE = 64 * 1000;
     public static final String FILES_DIR = "../files/";
     public static final String LOCALDISK_DIR = "../localdisk/";
+    public static final String SERVER_BACKUP_DIR = "../server_backup/";
     public static int UDP_MAX = 64 * 1024 - 20 - 8;
 
     public static int byte_to_kbyte(int size_in_bytes){
