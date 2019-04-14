@@ -70,11 +70,6 @@ public class FileSystem {
         return restored_path;
     }
 
-    public boolean contain_chunk(String file_id, int chunk_no) {
-        Path file = Paths.get(this.backup_path + file_id + "/" + chunk_no);
-        return Files.exists(file);
-    }
-
 
     public byte[] read_chunk_backup(String file_id, int chunk_no){
         return read_chunk(file_id, chunk_no, this.backup_path);

@@ -21,6 +21,13 @@ public class Utilities {
     public static final String LOCALDISK_DIR = "../localdisk/";
     public static int UDP_MAX = 64 * 1024 - 20 - 8;
 
+    public static int byte_to_kbyte(int size_in_bytes){
+        return size_in_bytes / 1000;
+    }
+
+    public static int kbyte_to_byte(int size_in_kbytes){
+        return size_in_kbytes * 1000;
+    }
 
     private static String bytesToHex(byte[] hashInBytes) {
         StringBuilder sb = new StringBuilder();

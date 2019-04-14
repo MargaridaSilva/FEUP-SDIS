@@ -29,4 +29,10 @@ public class ChunkId {
         return this.file_id.equals(id.file_id) 
                 && this.chunk_no == id.chunk_no;
     }
+
+    @Override
+    public String toString() {
+        return "File id: " + this.file_id + "\n" +
+                "Chunk no.: " + this.chunk_no;
+    }
 }

@@ -1,9 +1,11 @@
 package server;
 
 import java.rmi.server.UnicastRemoteObject;
+import java.util.List;
 
 import protocol.Protocol;
 import state.ChunkId;
+import state.ChunkInfo;
 import state.ServerState;
 
 import java.rmi.RemoteException;
@@ -131,8 +133,20 @@ class Server implements Peer {
 
     @Override
     public String reclaim(int max_space) throws RemoteException {
-        return null;
+        ServerState.max_space = max_space;
+        
+        List<ChunkInfo> chunks_to_remove = Algorithm.chunks_to_remove(ServerState.get_stored_chunks(), Utilities.kbyte_to_byte(max_space));
 
+        for(ChunkInfo chunk_info : chunks_to_remove){
+            ServerState.remove_stored_chunk(chunk_info.getChunkId());
+            try {
+                Protocol.removed(chunk_info.getChunkId());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return "OK";
     }
 
     @Override

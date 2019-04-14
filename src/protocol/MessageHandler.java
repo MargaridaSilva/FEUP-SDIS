@@ -53,38 +53,43 @@ public class MessageHandler implements Runnable {
 
 
 	private void handle_putchunk(ProtocolMessage message) {
-		if(message.sender_id == ServerInfo.getInstance().server_id){
+		if(message.sender_id == ServerInfo.getInstance().server_id || 
+			ServerState.backup_initiator(message.file_id) ||
+			ServerState.get_used_space() + message.body_len > ServerState.max_space){
 			return;
 		}
 
 		ChunkId chunk_id =  new ChunkId(message.file_id, message.chunk_num);
 		FileSystem.getInstance().save_chunk_backup(message.file_id, message.chunk_num, message.body, message.body_len);
-		ServerState.store_log(chunk_id, message.body_len);
+		ServerState.store_log(chunk_id, message.body_len, message.replication);
 		try {
 			Protocol.stored(chunk_id);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+
 	
 	private void handle_stored(ProtocolMessage message) {
 		ChunkId chunk_id =  new ChunkId(message.file_id, message.chunk_num);
 		ServerState.add_ack(chunk_id, message.sender_id);
 	}	
 	
+
 	private void handle_getchunk(ProtocolMessage message) {
 		if(message.sender_id == ServerInfo.getInstance().server_id){
 			return;
 		}
 
 		ChunkId chunk_id =  new ChunkId(message.file_id, message.chunk_num);
-		byte[] body = FileSystem.getInstance().read_chunk_backup(message.file_id, message.chunk_num);
-
-		if(FileSystem.getInstance().contain_chunk(message.file_id, message.chunk_num)){
+		
+		if(ServerState.store_contain_chunk(chunk_id)){
+			byte[] body = FileSystem.getInstance().read_chunk_backup(message.file_id, message.chunk_num);
 			ServerState.getchunk_request(chunk_id);
 			Protocol.chunk(chunk_id, body, body.length);
 		} 
 	}
+
 	
 	private void handle_chunk(ProtocolMessage message) {
 		ChunkId chunk_id =  new ChunkId(message.file_id, message.chunk_num);
@@ -97,15 +102,39 @@ public class MessageHandler implements Runnable {
 		}
 
 	}
+
 	
 	private void handle_delete(ProtocolMessage message) {
 		FileSystem.getInstance().delete_file(message.file_id);
 		ServerState.remove_file(message.file_id);
 	}
+
 	
 	private void handle_removed(ProtocolMessage message) {
-		System.out.println("Received removed");
-		
+		if(message.sender_id == ServerInfo.getInstance().server_id){
+			return;
+		}
+
+		ChunkId chunk_id =  new ChunkId(message.file_id, message.chunk_num);
+
+		ServerState.decrease_chunk_replication(chunk_id, message.sender_id);
+
+		if(ServerState.store_contain_chunk(chunk_id)){
+
+			int perceived_replication = ServerState.get_perceived_replication(chunk_id);
+			int desired_replication = ServerState.store_get_chunk_info(chunk_id).getDesiredReplication();
+
+			if(perceived_replication < desired_replication){
+				byte[] body = FileSystem.getInstance().read_chunk_backup(message.file_id, message.chunk_num);
+				try {
+					Protocol.putchunk_with_delay(chunk_id, desired_replication, body, body.length);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}	
 	}
+
+
 
 }

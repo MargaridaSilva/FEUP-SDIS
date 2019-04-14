@@ -2,11 +2,14 @@ package state;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerState implements Serializable{
     private static final long serialVersionUID = 1L;
+
+    public static int max_space = Integer.MAX_VALUE;
 
     //chunk store confirmation
     private static ConcurrentHashMap<ChunkId, HashSet<Integer>> perceived_replication = new ConcurrentHashMap<>();
@@ -27,6 +30,10 @@ public class ServerState implements Serializable{
     
 
 
+    //---------------------
+    //Perceived Replication
+    //---------------------
+
     public static void add_ack(ChunkId chunk_id, int server_id) {
         HashSet<Integer> servers_ack = perceived_replication.get(chunk_id);
 
@@ -38,7 +45,16 @@ public class ServerState implements Serializable{
         servers_ack.add(server_id);
     }
 
-    public static int get_ack_num(ChunkId chunk_id) {
+    public static void decrease_chunk_replication(ChunkId chunk_id, int server_id){
+        HashSet<Integer> servers_ack = perceived_replication.get(chunk_id);
+        
+        if(servers_ack != null){
+            servers_ack.remove(server_id);
+        }
+    }
+
+
+    public static int get_perceived_replication(ChunkId chunk_id) {
         HashSet<Integer> servers_ack = perceived_replication.get(chunk_id);
         if(servers_ack != null){
             return servers_ack.size();
@@ -46,10 +62,6 @@ public class ServerState implements Serializable{
         else{
             return 0;
         }
-    }
-
-    public static void remove_chunk(ChunkId chunk_id){
-        perceived_replication.remove(chunk_id);
     }
     
     public static void remove_file(String file_id){
@@ -59,6 +71,13 @@ public class ServerState implements Serializable{
 
 
 
+
+
+
+
+    //---------------------
+    // Pending getchunks
+    //---------------------
 
     public static void getchunk_request(ChunkId chunk_id){
         pending_getchunk.add(chunk_id);
@@ -75,9 +94,20 @@ public class ServerState implements Serializable{
     
 
 
+
+
+
+    //------------
+    // Backup log
+    //------------
+
 	public static void backup_log(String filename, String file_id, int replication_deg, int chunk_num) {
         FileInfo file_info = new FileInfo(filename, file_id, replication_deg, chunk_num);
         backup_log.put(file_id, file_info);
+    }
+
+    public static boolean backup_initiator(String file_id){
+        return backup_log.containsKey(file_id);
     }
 
     public static int get_num_chunks(String file_id){
@@ -98,6 +128,12 @@ public class ServerState implements Serializable{
 
 
 
+
+
+
+    //--------------
+    // Getchunk log
+    //--------------
 
     public static void getchunk_log(ChunkId chunk_id){
         getchunk_log.add(chunk_id);
@@ -121,8 +157,48 @@ public class ServerState implements Serializable{
     }
 
 
-	public static void store_log(ChunkId chunk_id, int size) {
-        store_log.put(chunk_id, new ChunkInfo(chunk_id, size));
+
+    
+
+
+    //------------
+    // Store log
+    //------------
+
+	public static void store_log(ChunkId chunk_id, int size, int desired_replication) {
+        store_log.put(chunk_id, new ChunkInfo(chunk_id, size, desired_replication));
+    }
+
+    public static PriorityQueue<ChunkInfo> get_stored_chunks(){
+        PriorityQueue<ChunkInfo> priority_queue = new PriorityQueue<>();
+
+        for(ChunkInfo chunk_info : store_log.values()){
+            priority_queue.add(chunk_info);
+        }
+
+        return priority_queue;
+    }
+
+    public static ChunkInfo store_get_chunk_info(ChunkId chunk_id) {
+        return store_log.get(chunk_id);
+    }
+
+    public static int get_used_space(){
+        int size = 0;
+
+        for(ChunkInfo chunk_info : store_log.values()){
+            size += chunk_info.getSize();
+        }
+
+        return size;
+    }
+
+	public static boolean store_contain_chunk(ChunkId chunk_id) {
+		return store_log.containsKey(chunk_id);
+	}
+
+    public static void remove_stored_chunk(ChunkId chunk_id){
+        store_log.remove(chunk_id);
     }
       
     public static String store_log_info(){
@@ -136,4 +212,5 @@ public class ServerState implements Serializable{
         return info;
         
     }
+
 }
