@@ -1,10 +1,13 @@
 package protocol;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.Random;
 
+import channel.TCPClient;
 import state.ChunkId;
 import state.ServerState;
+import utilities.Utilities;
 import server.ServerInfo;
 
 public class Protocol {
@@ -28,6 +31,8 @@ public class Protocol {
         int wait_time = BASE_WAIT_TIME_MS;
 
         do {
+            System.out.println("Try no. " + (tries + 1));
+
             server.mdb.sendMessage(message);
             try {
                 System.out.println("Going to sleep for " + wait_time + " ms\n");
@@ -40,8 +45,6 @@ public class Protocol {
 
             tries++;
             wait_time *= 2;
-
-            System.out.println("Try no. " + tries);
         } while (tries < MAX_TRIES && perceived_replication < replication);
     }
 
@@ -72,6 +75,7 @@ public class Protocol {
         ServerState.getchunk_log(chunk_id);
     }
 
+
     public static void chunk(ChunkId chunk_id, byte[] bytes, int readBytes) {
 
         ProtocolMessage message = new ProtocolMessage("CHUNK", server.protocol_ver, server.server_id, chunk_id.file_id, chunk_id.chunk_no, 0,
@@ -89,6 +93,31 @@ public class Protocol {
             ServerState.getchunk_delete(chunk_id);
             try {
                 server.mdr.sendMessage(message);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void chunk_enh(ChunkId chunk_id, byte[] bytes, int readBytes, InetAddress sender_address) {
+
+        ProtocolMessage message = new ProtocolMessage("CHUNK", server.protocol_ver, server.server_id, chunk_id.file_id, chunk_id.chunk_no, 0,
+                bytes, readBytes);
+
+        Random rand = new Random();
+
+        try {
+            Thread.sleep(rand.nextInt(CHUNK_MAX_DELAY_MS + 1));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        TCPClient socket = new TCPClient(sender_address, Utilities.TCP_PORT);
+
+        if (ServerState.is_getchunk_pendent(chunk_id)) {
+            ServerState.getchunk_delete(chunk_id);
+            try {
+                socket.send(message.buf);
             } catch (IOException e) {
                 e.printStackTrace();
             }

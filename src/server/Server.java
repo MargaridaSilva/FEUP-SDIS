@@ -20,7 +20,7 @@ import initiators.*;
 class Server implements Peer {
 
     private ServerInfo server_info;
-    public static Executor server_backup = null;
+    private static Executor server_backup = null;
     
     Server(String protocol_ver, int server_id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr,
             int mdr_port)
@@ -65,6 +65,7 @@ class Server implements Peer {
 
     private void printInfo() {
         System.out.println("Server " + this.server_info.server_id + " is now running.");
+        System.out.println("Protocol version: " + this.server_info.protocol_ver);
         System.out.println("---------------------------------------------\n\n");
     }
 
@@ -78,6 +79,15 @@ class Server implements Peer {
     public String restore(String filename) throws RemoteException {
     	Executors.newSingleThreadExecutor().execute(new RestoreInitiator(filename));
 		return "OK";
+    }
+
+    @Override
+    public String restore_enh(String filename) throws RemoteException {
+        if(server_info.protocol_ver != Utilities.ENH_VERSION){
+            return "Version not compatible";
+        }
+        Executors.newSingleThreadExecutor().execute(new RestoreEnhInitiator(filename));
+        return "OK";
     }
 
     @Override

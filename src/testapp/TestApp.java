@@ -37,6 +37,11 @@ class TestApp {
                 testapp.restore(filename);
                 break;
             }
+            case "RESTOREENH":{
+                String filename = args[2];
+                testapp.restore_enh(filename);
+                break;
+            }
             case "DELETE":{
                 String filename = args[2];
                 testapp.delete(filename);
@@ -74,6 +79,15 @@ class TestApp {
         }
     }
 
+    private void restore_enh(String filename) {
+        try {
+            String response = this.stub.restore_enh(filename);
+            System.out.println("RestoreEnh: " + response);
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
     private void delete(String filename) {
         try {

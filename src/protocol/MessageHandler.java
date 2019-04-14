@@ -1,19 +1,23 @@
 package protocol;
 
 import java.io.IOException;
+import java.net.InetAddress;
 
 import protocol.ProtocolMessage;
 import state.ChunkId;
 import state.ServerState;
 import server.ServerInfo;
 import utilities.FileSystem;
+import utilities.Utilities;
 
 public class MessageHandler implements Runnable {
 
 	byte[] packet;
+	InetAddress sender_address;
 
-	public MessageHandler(byte[] packet) {
+	public MessageHandler(byte[] packet, InetAddress sender_address) {
 		this.packet = packet;
+		this.sender_address = sender_address;
 	}
 
 	@Override
@@ -81,12 +85,21 @@ public class MessageHandler implements Runnable {
 			return;
 		}
 
-		ChunkId chunk_id =  new ChunkId(message.file_id, message.chunk_num);
+		ChunkId chunk_id = new ChunkId(message.file_id, message.chunk_num);
 		
 		if(ServerState.store_contain_chunk(chunk_id)){
 			byte[] body = FileSystem.getInstance().read_chunk_backup(message.file_id, message.chunk_num);
 			ServerState.getchunk_request(chunk_id);
-			Protocol.chunk(chunk_id, body, body.length);
+			
+			switch(ServerInfo.getInstance().protocol_ver){
+				case Utilities.STOCK_VERSION:
+					Protocol.chunk(chunk_id, body, body.length);
+					break;
+				case Utilities.ENH_VERSION:
+					Protocol.chunk_enh(chunk_id, body, body.length, sender_address);
+					break;
+			}
+			
 		} 
 	}
 

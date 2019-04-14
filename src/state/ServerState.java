@@ -141,6 +141,17 @@ public class ServerState implements Externalizable{
         getchunk_log.add(chunk_id);
     }
 
+    public static String getchunk_log_info(){
+        String info = "Getchunk log: \n\n";
+
+        for (ChunkId chunk_id : getchunk_log) {
+            info += chunk_id + "\n";
+        }
+
+        return info;
+    }
+
+
     public static boolean getchunk_requested(ChunkId chunk_id){
         return getchunk_log.contains(chunk_id);
     }
@@ -151,7 +162,7 @@ public class ServerState implements Externalizable{
 
     public static boolean getchunk_pendents(String file_id){
         for(ChunkId chunk_id : getchunk_log){
-            if(chunk_id.file_id == file_id){
+            if(chunk_id.file_id.equals(file_id)){
                 return true;
             }
         }

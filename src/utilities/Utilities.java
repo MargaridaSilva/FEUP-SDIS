@@ -16,11 +16,19 @@ public class Utilities {
     public static int mdb_port = 8000;
     public static String mdr_addr = "224.0.0.3";
     public static int mdr_port = 8000;
+
+    public static final int TCP_PORT = 8000;
+    
+    public static int UDP_MAX = 64 * 1024 - 20 - 8;
     public static int CHUNK_SIZE = 64 * 1000;
+
+    public static final String STOCK_VERSION = "1.0";
+    public static final String ENH_VERSION = "2.0";
+
     public static final String FILES_DIR = "../files/";
     public static final String LOCALDISK_DIR = "../localdisk/";
     public static final String SERVER_BACKUP_DIR = "../server_backup/";
-    public static int UDP_MAX = 64 * 1024 - 20 - 8;
+
 
     public static int byte_to_kbyte(int size_in_bytes){
         return size_in_bytes / 1000;

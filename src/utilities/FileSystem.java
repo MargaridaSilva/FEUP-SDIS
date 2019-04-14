@@ -217,7 +217,6 @@ public class FileSystem {
 	
 	public void load_server_state() {
     	ServerState state = new ServerState();
-    	System.out.println(ServerBackup.path);
         
  	   try {
             FileInputStream fis = new FileInputStream(ServerBackup.path+"/log");

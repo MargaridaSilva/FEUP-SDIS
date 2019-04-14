@@ -38,7 +38,7 @@ public class Channel implements Runnable {
     public void sendMessage(ProtocolMessage message) throws IOException {
         System.out.println("Message sent");
         message.printMessageInfo();
-        System.out.println("");
+        System.out.println();
         DatagramPacket packet = new DatagramPacket(message.buf, message.buf_len, this.inet_addr, this.port);
         this.socket.send(packet);
     }
@@ -51,7 +51,7 @@ public class Channel implements Runnable {
             try {
                 socket.receive(recv);
                 byte[] buf_copy = Arrays.copyOf(recv.getData(),recv.getLength());
-                MessageHandler task = new MessageHandler(buf_copy);
+                MessageHandler task = new MessageHandler(buf_copy, recv.getAddress());
                 ThreadPool.executor.execute(task);
     
             } catch (IOException e) {
