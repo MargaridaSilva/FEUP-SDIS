@@ -31,7 +31,6 @@ public class ServerState implements Externalizable{
     private static  Set<ChunkId> getchunk_log = ConcurrentHashMap.newKeySet();
     
 
-
     //---------------------
     //Perceived Replication
     //---------------------

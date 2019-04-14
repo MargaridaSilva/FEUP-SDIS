@@ -22,6 +22,8 @@ public class BackupInitiator implements Runnable {
     
 	@Override
 	public void run() {
+		
+		
         try{
             InputStream in_file = new FileInputStream(Utilities.FILES_DIR + filename);
             String file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
@@ -32,7 +34,10 @@ public class BackupInitiator implements Runnable {
 
             while ((readBytes = in_file.read(bytes, 0, Utilities.CHUNK_SIZE)) != -1) {
                 ChunkId chunk_id = new ChunkId(file_id, i);
-                Protocol.putchunk(version, chunk_id, replication, bytes, readBytes);
+                if (this.version == Utilities.ENH_VERSION && ServerState.get_perceived_replication(chunk_id) < replication) {
+                	Protocol.putchunk(version, chunk_id, replication, bytes, readBytes);
+        		}
+                
                 i++;
             }
 

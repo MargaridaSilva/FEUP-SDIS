@@ -44,7 +44,6 @@ public class ProtocolMessage {
 
     public ProtocolMessage(String sub_protocol, String version, int sender_id, String file_id, int chunk_num, int replication, byte[] body, int body_len) {
 
-        this.version = version;
         this.file_id = file_id;
         this.sender_id = sender_id;
         this.chunk_num = chunk_num;
@@ -75,13 +74,13 @@ public class ProtocolMessage {
         this.buf_len = buf.length;
     }
     
+    
     public boolean isEmptyHeader(String header) {
     	return header == "";
     }
     
     public void printMessageInfo() {
         System.out.println( "Type: "+ this.type + "\n" +
-                            "Version: "+ this.version + "\n" + 
                             "Sender: "+this.sender_id + "\n" +
                             "File: "+ this.file_id + "\n" +
                             "Chunk no.: " + this.chunk_num);
@@ -105,4 +104,18 @@ public class ProtocolMessage {
                return null;
             }
     }
+
+    public void processHeader(String header) {
+    	String[] args = header.split(" ");
+    	this.sender_id = Integer.parseInt(args[2]);
+    	this.file_id = args[3];
+    	this.version = args[1];
+        this.type = getType(args[0]);
+        if (this.type != Type.DELETE) {
+        	this.chunk_num = Integer.parseInt(args[4]);
+        	if (this.type == Type.PUTCHUNK)
+        		this.replication = Integer.parseInt(args[5]);
+        }
+    }
+
 }
