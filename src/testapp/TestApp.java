@@ -42,6 +42,11 @@ class TestApp {
                 testapp.delete(filename);
                 break;
             }
+            case "RECLAIM":{
+                int max_space = Integer.parseInt(args[2]);
+                testapp.reclaim(max_space);
+                break;
+            }
             case "STATE":
                 testapp.state();
                 break;
@@ -74,6 +79,17 @@ class TestApp {
         try {
             String response = this.stub.delete(filename);
             System.out.println("Delete: " + response);
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+
+    private void reclaim(int max_space) {
+        try {
+            String response = this.stub.reclaim(max_space);
+            System.out.println("Reclaim: " + response);
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

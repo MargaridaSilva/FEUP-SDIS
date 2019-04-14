@@ -20,18 +20,8 @@ public class Protocol {
 
     public static void putchunk(ChunkId chunk_id, int replication, byte[] bytes, int readBytes) throws IOException {
 
-        ProtocolMessage message = new ProtocolMessage("PUTCHUNK", server.protocol_ver, server.server_id, chunk_id.file_id, chunk_id.chunk_no,
-                replication, bytes, readBytes);
-
-        // TimerTask task = new TimerTask() {
-        // public void run() {
-        // System.out.println("Not able to replicate all\n" +
-        // "Thread's name: " + Thread.currentThread().getName());
-        // }
-        // };
-        // Timer timer = new Timer();
-        // server.mdb.sendMessage(message);
-        // timer.schedule(task, 400L);
+        ProtocolMessage message = new ProtocolMessage("PUTCHUNK", server.protocol_ver, server.server_id,
+                chunk_id.file_id, chunk_id.chunk_no, replication, bytes, readBytes);
 
         int tries = 0;
         int ack_num;
@@ -56,8 +46,8 @@ public class Protocol {
     }
 
     public static void stored(ChunkId chunk_id) throws IOException {
-        ProtocolMessage message = new ProtocolMessage("STORED", server.protocol_ver, server.server_id, chunk_id.file_id, chunk_id.chunk_no,
-                0, null, 0);
+        ProtocolMessage message = new ProtocolMessage("STORED", server.protocol_ver, server.server_id, chunk_id.file_id,
+                chunk_id.chunk_no, 0, null, 0);
         Random rand = new Random();
         try {
             Thread.sleep(rand.nextInt(STORED_MAX_DELAY_MS + 1));
@@ -68,8 +58,16 @@ public class Protocol {
     }
 
     public static void getchunk(ChunkId chunk_id) throws IOException {
-        ProtocolMessage message = new ProtocolMessage("GETCHUNK", server.protocol_ver, server.server_id, chunk_id.file_id, chunk_id.chunk_no,
-                0, null, 0);
+        ProtocolMessage message = new ProtocolMessage("GETCHUNK", server.protocol_ver, server.server_id,
+                chunk_id.file_id, chunk_id.chunk_no, 0, null, 0);
+        
+        //TODO Buffer full 
+        try {
+            Thread.sleep(400);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         server.mc.sendMessage(message);
         ServerState.getchunk_log(chunk_id);
     }

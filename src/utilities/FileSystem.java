@@ -9,22 +9,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 
-
 public class FileSystem {
-    
+
     private static FileSystem fs = null;
 
-    public static FileSystem init(int server_id) { 
-        fs = new FileSystem(server_id); 
-        return fs; 
-    } 
+    public static FileSystem init(int server_id) {
+        fs = new FileSystem(server_id);
+        return fs;
+    }
 
-    public static FileSystem getInstance() { 
-        if(fs == null){
-            //throw error
+    public static FileSystem getInstance() {
+        if (fs == null) {
+            // throw error
         }
-        return fs; 
-    } 
+        return fs;
+    }
 
     private int server_id;
     String server_path;
@@ -53,7 +52,7 @@ public class FileSystem {
     public void create_file_dir(String file_id, String path) {
 
         String new_path = path + file_id;
-        if(Files.notExists(Paths.get(new_path))){
+        if (Files.notExists(Paths.get(new_path))) {
             try {
                 Files.createDirectories(Paths.get(new_path));
             } catch (IOException e) {
@@ -62,7 +61,6 @@ public class FileSystem {
         }
 
     }
- 
 
     public String getBackupPath() {
         return backup_path;
@@ -72,15 +70,23 @@ public class FileSystem {
         return restored_path;
     }
 
-
-    public boolean contain_chunk(String file_id, int chunk_no){
+    public boolean contain_chunk(String file_id, int chunk_no) {
         Path file = Paths.get(this.backup_path + file_id + "/" + chunk_no);
-        return Files.exists(file);        
+        return Files.exists(file);
     }
 
-    public byte[] read_chunk(String file_id, int chunk_no){
-        Path file = Paths.get(this.backup_path + file_id + "/" + chunk_no);
-        if(Files.exists(file)){
+
+    public byte[] read_chunk_backup(String file_id, int chunk_no){
+        return read_chunk(file_id, chunk_no, this.backup_path);
+    }
+
+    public byte[] read_chunk_restore(String file_id, int chunk_no){
+        return read_chunk(file_id, chunk_no, this.restored_path);
+    }
+
+    public byte[] read_chunk(String file_id, int chunk_no, String path) {
+        Path file = Paths.get(path + file_id + "/" + chunk_no);
+        if (Files.exists(file)) {
             try {
                 byte[] file_content;
                 file_content = Files.readAllBytes(file);
@@ -90,9 +96,42 @@ public class FileSystem {
             }
         }
         return null;
-        
+
     }
 
+    public void join_chunk(String file_id, String filename) {
+        Path directory = Paths.get(this.restored_path + file_id);
+        String output_file = this.restored_path + filename;
+
+        try {
+            FileOutputStream fos = new FileOutputStream(output_file);
+
+            if (Files.exists(directory) && Files.isDirectory(directory)){
+                Files.walk(directory)
+                    .filter(Files::isRegularFile)
+                    .sorted(Comparator.comparingInt(this::pathToInt))
+                    .forEach(p -> {
+                            try {
+                                fos.write(Files.readAllBytes(p));
+                                Files.delete(p);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                    });
+                Files.delete(directory);
+                fos.close();
+            }
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+    }
+
+    private int pathToInt(final Path path) {
+        return Integer.parseInt(path.getFileName()
+                .toString()
+        );
+    }
 
     public void save_chunk_backup(String file_id, int chunk_no, byte[] bytes, int size){
         save_chunk(file_id, chunk_no, bytes, size, this.backup_path);

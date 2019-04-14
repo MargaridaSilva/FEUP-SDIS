@@ -48,11 +48,6 @@ public class ServerState implements Serializable{
         }
     }
 
-    public static int get_num_chunks(String file_id){
-        FileInfo info = backup_log.get(file_id);
-        return info.get_chunk_num();
-    }
-
     public static void remove_chunk(ChunkId chunk_id){
         perceived_replication.remove(chunk_id);
     }
@@ -84,7 +79,12 @@ public class ServerState implements Serializable{
         FileInfo file_info = new FileInfo(filename, file_id, replication_deg, chunk_num);
         backup_log.put(file_id, file_info);
     }
-    
+
+    public static int get_num_chunks(String file_id){
+        FileInfo info = backup_log.get(file_id);
+        return info.get_chunk_num();
+    }
+
     public static String backup_log_info(){
 
         String info = "Backup log: \n\n";
@@ -98,6 +98,7 @@ public class ServerState implements Serializable{
 
 
 
+
     public static void getchunk_log(ChunkId chunk_id){
         getchunk_log.add(chunk_id);
     }
@@ -108,6 +109,15 @@ public class ServerState implements Serializable{
 
     public static void getchunk_handled(ChunkId chunk_id) {
         getchunk_log.remove(chunk_id);
+    }
+
+    public static boolean getchunk_pendents(String file_id){
+        for(ChunkId chunk_id : getchunk_log){
+            if(chunk_id.file_id == file_id){
+                return true;
+            }
+        }
+        return false;
     }
 
 

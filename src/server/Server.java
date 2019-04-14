@@ -98,7 +98,17 @@ class Server implements Peer {
 
 			for(int i = 0; i < num_chunks; i++) {
 				Protocol.getchunk(new ChunkId(file_id, i));
-	    	}
+            }
+            int i = 0;
+
+            while(ServerState.getchunk_pendents(file_id) && i < 10){
+                Thread.sleep(100);
+                i++;
+            }
+
+            if(!ServerState.getchunk_pendents(file_id)){
+                FileSystem.getInstance().join_chunk(file_id, filename);
+            }
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -120,14 +130,14 @@ class Server implements Peer {
     }
 
     @Override
-    public String reclaim(int space) throws RemoteException {
+    public String reclaim(int max_space) throws RemoteException {
         return null;
 
     }
 
     @Override
     public String state() throws RemoteException {
-        return  ServerState.backup_log_info() + ServerState.store_log_info();
+        return ServerState.backup_log_info() + ServerState.store_log_info();
     }
 
     // protocol version, the server id, service access point, MC, MDB, MDR

@@ -78,9 +78,10 @@ public class ProtocolMessage {
     }
     
     public void printMessageInfo() {
-    	System.out.println("Type: "+ this.type);
-    	System.out.println("Sender: "+this.sender_id);
-        System.out.println("File: "+ this.file_id);
+        System.out.println( "Type: "+ this.type + "\n" +
+                            "Sender: "+this.sender_id + "\n" +
+                            "File: "+ this.file_id + "\n" +
+                            "Chunk no.: " + this.chunk_num);
     }
     
     public Type getType(String type){

@@ -19,7 +19,7 @@ public class MessageHandler implements Runnable {
 	@Override
 	public void run() {
 		ProtocolMessage message;
-		
+
 		try {
 			message = new ProtocolMessage(this.packet);
 		} catch (Exception e) {
@@ -78,7 +78,7 @@ public class MessageHandler implements Runnable {
 		}
 
 		ChunkId chunk_id =  new ChunkId(message.file_id, message.chunk_num);
-		byte[] body = FileSystem.getInstance().read_chunk(message.file_id, message.chunk_num);
+		byte[] body = FileSystem.getInstance().read_chunk_backup(message.file_id, message.chunk_num);
 
 		if(FileSystem.getInstance().contain_chunk(message.file_id, message.chunk_num)){
 			ServerState.getchunk_request(chunk_id);
@@ -87,7 +87,6 @@ public class MessageHandler implements Runnable {
 	}
 	
 	private void handle_chunk(ProtocolMessage message) {
-		System.out.println("Received Chunk");
 		ChunkId chunk_id =  new ChunkId(message.file_id, message.chunk_num);
 		
 		if(ServerState.getchunk_requested(chunk_id)){
