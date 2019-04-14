@@ -32,6 +32,12 @@ class TestApp {
                 testapp.backup(filename, replication);
                 break;
             }
+            case "BACKUPENH":{
+                String filename = args[2];
+                int replication = Integer.parseInt(args[3]);
+                testapp.backup_enh(filename, replication);
+                break;
+            }
             case "RESTORE":{
                 String filename = args[2];
                 testapp.restore(filename);
@@ -63,6 +69,16 @@ class TestApp {
         try {
             String response = this.stub.backup(filename, replication);
             System.out.println("Backup: " + response);
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    private void backup_enh(String filename, int replication) {
+        try {
+            String response = this.stub.backup_enh(filename, replication);
+            System.out.println("BackupEnh: " + response);
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

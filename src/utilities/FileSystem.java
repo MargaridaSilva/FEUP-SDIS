@@ -13,7 +13,6 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 
 import server.ServerInfo;
-import state.ServerBackup;
 import state.ServerState;
 
 public class FileSystem {
@@ -45,15 +44,17 @@ public class FileSystem {
     }
 
     public void createPeerFileStructure() {
-
-        try {
-            Files.createDirectories(Paths.get(this.server_path));
-            Files.createDirectories(Paths.get(this.backup_path));
-            Files.createDirectories(Paths.get(this.restored_path));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    	
+    	if (Files.notExists(Paths.get(this.server_path))) {
+    		try {
+                Files.createDirectories(Paths.get(this.server_path));
+                Files.createDirectories(Paths.get(this.backup_path));
+                Files.createDirectories(Paths.get(this.restored_path));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+    	}
+        
     }
 
     public void create_file_dir(String file_id, String path) {
@@ -190,9 +191,9 @@ public class FileSystem {
     }
     
     public void save_server_state(ServerState state) {
-    
+    	String server_backup_path = Utilities.SERVER_BACKUP_DIR + ServerInfo.getInstance().server_id + "/log";
 	   try {
-           FileOutputStream fos = new FileOutputStream(Utilities.SERVER_BACKUP_DIR+ServerInfo.getInstance().server_id+"/log");
+           FileOutputStream fos = new FileOutputStream(server_backup_path);
            ObjectOutputStream oos = new ObjectOutputStream(fos);
            state.writeExternal(oos);
            oos.close();
@@ -202,26 +203,13 @@ public class FileSystem {
        } 
     }
     
-
-	public void createServerBackupStructure() {
-		Path path =  Paths.get(ServerBackup.path);
-		if (Files.exists(path) && Files.isDirectory(path)) {
-			load_server_state();
-		} else
-			try {
-				Files.createDirectories(path);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-	}
 	
-	public void load_server_state() {
-    	ServerState state = new ServerState();
-        
+	public void load_server_state(String server_backup_path) {
+		ServerState backup = new ServerState();
  	   try {
-            FileInputStream fis = new FileInputStream(ServerBackup.path+"/log");
+            FileInputStream fis = new FileInputStream(server_backup_path);
             ObjectInputStream ois = new ObjectInputStream(fis);
-            state.readExternal(ois);
+            backup.readExternal(ois);
             ois.close();
             fis.close();
         } catch (IOException e) {
@@ -230,4 +218,21 @@ public class FileSystem {
 			e.printStackTrace();
 		} 
      }
+
+	public void handleServerStateBackup() {
+		String backup_path = Utilities.SERVER_BACKUP_DIR + ServerInfo.getInstance().server_id;
+    	String server_backup_path = backup_path + "/log";
+    	Path path = Paths.get(server_backup_path);
+    	if (Files.exists(path)) {
+    		load_server_state(server_backup_path);
+    	}
+    	else {
+    		try {
+    			Files.createDirectories(Paths.get(backup_path));
+    		} catch (IOException e) {
+    			e.printStackTrace();
+    		}
+    	}
+		
+	}
 }

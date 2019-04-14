@@ -11,16 +11,18 @@ import utilities.Utilities;
 public class BackupInitiator implements Runnable {
 
 	String filename;
-	int replication;
+    int replication;
+    String version;
 	
 	public BackupInitiator(String filename, int replication){
 		this.filename = filename;
-		this.replication = replication;
+        this.replication = replication;
+        this.version = Utilities.STOCK_VERSION;
 	}
-	
+    
 	@Override
 	public void run() {
-	 try{
+        try{
             InputStream in_file = new FileInputStream(Utilities.FILES_DIR + filename);
             String file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
 
@@ -30,7 +32,7 @@ public class BackupInitiator implements Runnable {
 
             while ((readBytes = in_file.read(bytes, 0, Utilities.CHUNK_SIZE)) != -1) {
                 ChunkId chunk_id = new ChunkId(file_id, i);
-                Protocol.putchunk(chunk_id, replication, bytes, readBytes);
+                Protocol.putchunk(version, chunk_id, replication, bytes, readBytes);
                 i++;
             }
 
@@ -41,7 +43,6 @@ public class BackupInitiator implements Runnable {
         }catch(Exception e){
             e.printStackTrace();
         }
-		
 	}
 	
 }

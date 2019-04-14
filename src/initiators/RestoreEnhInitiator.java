@@ -4,10 +4,10 @@ import channel.TCPServer;
 import utilities.Utilities;
 
 public class RestoreEnhInitiator extends RestoreInitiator implements Runnable {
-	String filename;
 	
 	public RestoreEnhInitiator(String filename){
 		super(filename);
+		this.version = Utilities.ENH_VERSION;
 	}
 
 	@Override

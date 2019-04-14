@@ -8,9 +8,11 @@ import utilities.Utilities;
 
 public class RestoreInitiator implements Runnable {
 	String filename;
+	String version;
 	
 	public RestoreInitiator(String filename){
 		this.filename = filename;
+		this.version = Utilities.STOCK_VERSION;
 	}
 
 
@@ -20,7 +22,7 @@ public class RestoreInitiator implements Runnable {
             int num_chunks = ServerState.get_num_chunks(file_id);
 
 			for(int i = 0; i < num_chunks; i++) {
-				Protocol.getchunk(new ChunkId(file_id, i));
+				Protocol.getchunk(version, new ChunkId(file_id, i));
             }
             int i = 0;
 

@@ -18,12 +18,11 @@ public class Protocol {
     private static final int CHUNK_MAX_DELAY_MS = 400;
     private static final int PUTCHUNK_MAX_DELAY_MS = 400;
 
-
     private static ServerInfo server = ServerInfo.getInstance();
 
-    public static void putchunk(ChunkId chunk_id, int replication, byte[] bytes, int readBytes) throws IOException {
+    public static void putchunk(String version, ChunkId chunk_id, int replication, byte[] bytes, int readBytes) throws IOException {
 
-        ProtocolMessage message = new ProtocolMessage("PUTCHUNK", server.protocol_ver, server.server_id,
+        ProtocolMessage message = new ProtocolMessage("PUTCHUNK", version, server.server_id,
                 chunk_id.file_id, chunk_id.chunk_no, replication, bytes, readBytes);
 
         int tries = 0;
@@ -60,8 +59,8 @@ public class Protocol {
         server.mc.sendMessage(message);
     }
 
-    public static void getchunk(ChunkId chunk_id) throws IOException {
-        ProtocolMessage message = new ProtocolMessage("GETCHUNK", server.protocol_ver, server.server_id,
+    public static void getchunk(String version, ChunkId chunk_id) throws IOException {
+        ProtocolMessage message = new ProtocolMessage("GETCHUNK", version, server.server_id,
                 chunk_id.file_id, chunk_id.chunk_no, 0, null, 0);
         
         //TODO Buffer full 
@@ -135,7 +134,6 @@ public class Protocol {
     }
     
 
-
     public static void putchunk_with_delay(ChunkId chunk_id, int replication, byte[] bytes, int readBytes) throws IOException {
         
         Random rand = new Random();
@@ -150,7 +148,7 @@ public class Protocol {
         int desired_replication = ServerState.store_get_chunk_info(chunk_id).getDesiredReplication();
 
         if(perceived_replication < desired_replication){
-            putchunk(chunk_id, replication, bytes, readBytes);
+            putchunk(Utilities.STOCK_VERSION, chunk_id, replication, bytes, readBytes);
         }
     }
 }
