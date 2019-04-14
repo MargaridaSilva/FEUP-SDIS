@@ -1,26 +1,21 @@
 package server;
 
 import java.rmi.server.UnicastRemoteObject;
-import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import protocol.Protocol;
-import state.ChunkId;
-import state.ChunkInfo;
 import state.ServerState;
 import state.ServerBackup;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import utilities.Utilities;
 import utilities.FileSystem;
 import channel.Channel;
+import initiators.*;
 
 class Server implements Peer {
 
@@ -75,87 +70,26 @@ class Server implements Peer {
 
     @Override   
     public String backup(String filename, int replication) throws RemoteException {
-
-        try{
-            InputStream in_file = new FileInputStream(Utilities.FILES_DIR + filename);
-            String file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
-
-            int readBytes = 0;
-            byte[] bytes = new byte[Utilities.CHUNK_SIZE];
-            int i = 0;
-
-            while ((readBytes = in_file.read(bytes, 0, Utilities.CHUNK_SIZE)) != -1) {
-                ChunkId chunk_id = new ChunkId(file_id, i);
-                Protocol.putchunk(chunk_id, replication, bytes, readBytes);
-                i++;
-            }
-
-            in_file.close();
-
-            ServerState.backup_log(filename, file_id, replication, i);
-
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-
+    	Executors.newSingleThreadExecutor().execute(new BackupInitiator(filename, replication));
         return "OK";
     }
 
     @Override
     public String restore(String filename) throws RemoteException {
-
-		try {
-            String file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
-            int num_chunks = ServerState.get_num_chunks(file_id);
-
-			for(int i = 0; i < num_chunks; i++) {
-				Protocol.getchunk(new ChunkId(file_id, i));
-            }
-            int i = 0;
-
-            while(ServerState.getchunk_pendents(file_id) && i < 10){
-                Thread.sleep(100);
-                i++;
-            }
-
-            if(!ServerState.getchunk_pendents(file_id)){
-                FileSystem.getInstance().join_chunk(file_id, filename);
-            }
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+    	Executors.newSingleThreadExecutor().execute(new RestoreInitiator(filename));
 		return "OK";
     }
 
     @Override
     public String delete(String filename) throws RemoteException {
-        try{
-            String file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
-            Protocol.delete(file_id);
-
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-
+    	Executors.newSingleThreadExecutor().execute(new DeleteInitiator(filename));
         return "OK";
 
     }
 
     @Override
     public String reclaim(int max_space) throws RemoteException {
-        ServerState.max_space = max_space;
-        
-        List<ChunkInfo> chunks_to_remove = Algorithm.chunks_to_remove(ServerState.get_stored_chunks(), Utilities.kbyte_to_byte(max_space));
-
-        for(ChunkInfo chunk_info : chunks_to_remove){
-            ServerState.remove_stored_chunk(chunk_info.getChunkId());
-            try {
-                Protocol.removed(chunk_info.getChunkId());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
+    	Executors.newSingleThreadExecutor().execute(new ReclaimInitiator(max_space));
         return "OK";
     }
 

@@ -2,8 +2,6 @@ package protocol;
 
 import java.io.IOException;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import state.ChunkId;
 import state.ServerState;
