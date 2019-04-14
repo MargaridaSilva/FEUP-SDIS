@@ -1,11 +1,15 @@
 package state;
 
-import java.io.Serializable;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ServerState implements Serializable{
+
+public class ServerState implements Externalizable{
     private static final long serialVersionUID = 1L;
 
     //chunk store confirmation
@@ -23,10 +27,8 @@ public class ServerState implements Serializable{
     private static ConcurrentHashMap<ChunkId, ChunkInfo> store_log = new ConcurrentHashMap<>();
 
     //chunk this server requests
-    private static Set<ChunkId> getchunk_log = ConcurrentHashMap.newKeySet();
+    private static  Set<ChunkId> getchunk_log = ConcurrentHashMap.newKeySet();
     
-
-
     public static void add_ack(ChunkId chunk_id, int server_id) {
         HashSet<Integer> servers_ack = perceived_replication.get(chunk_id);
 
@@ -99,7 +101,7 @@ public class ServerState implements Serializable{
 
 
 
-    public static void getchunk_log(ChunkId chunk_id){
+    public  static void getchunk_log(ChunkId chunk_id){
         getchunk_log.add(chunk_id);
     }
 
@@ -136,4 +138,24 @@ public class ServerState implements Serializable{
         return info;
         
     }
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+		getchunk_log =  (Set<ChunkId>) in.readObject();
+		store_log =  (ConcurrentHashMap<ChunkId, ChunkInfo>) in.readObject();
+		backup_log =  (ConcurrentHashMap<String, FileInfo>) in.readObject();
+		pending_getchunk =  (Set<ChunkId>) in.readObject();
+		perceived_replication = (ConcurrentHashMap<ChunkId, HashSet<Integer>>) in.readObject();
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeObject(perceived_replication);
+		out.writeObject(pending_getchunk);
+		out.writeObject(backup_log);
+		out.writeObject(store_log);
+		out.writeObject(getchunk_log);
+		
+	}
 }

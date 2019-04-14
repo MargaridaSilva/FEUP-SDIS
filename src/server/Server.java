@@ -1,10 +1,13 @@
 package server;
 
 import java.rmi.server.UnicastRemoteObject;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import protocol.Protocol;
 import state.ChunkId;
 import state.ServerState;
+import state.ServerBackup;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -19,6 +22,7 @@ import channel.Channel;
 class Server implements Peer {
 
     private ServerInfo server_info;
+    public static Executor server_backup = null;
     
     Server(String protocol_ver, int server_id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr,
             int mdr_port)
@@ -34,6 +38,11 @@ class Server implements Peer {
 
         ServerInfo.init(protocol_ver, server_id, mc, mdb, mdr);
         this.server_info = ServerInfo.getInstance();
+        
+    	if (server_backup == null) {
+    		server_backup = Executors.newSingleThreadExecutor();
+    		server_backup.execute(new ServerBackup());
+    	}
     }
 
     public void listenChannels(){

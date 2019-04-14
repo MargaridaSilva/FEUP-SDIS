@@ -1,8 +1,14 @@
 package state;
 
-public class ChunkInfo {
+import java.io.Serializable;
 
-    private ChunkId id;
+public class ChunkInfo implements Serializable{
+
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private ChunkId id;
     private int size;
 
     ChunkInfo(ChunkId id, int size) {

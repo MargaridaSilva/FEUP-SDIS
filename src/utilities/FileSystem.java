@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+
+import state.ServerState;
 
 public class FileSystem {
 
@@ -32,7 +35,7 @@ public class FileSystem {
 
     public FileSystem(int server_id) {
         this.server_id = server_id;
-        this.server_path = Utilities.LOCALDISK_DIR + this.server_id + "/";
+        this.server_path = Utilities.CHUNKS_DIR + this.server_id + "/";
         this.backup_path = this.server_path + "backup/";
         this.restored_path = this.server_path + "restored/";
     }
@@ -185,6 +188,19 @@ public class FileSystem {
                 e.printStackTrace();
             }
         }
+    }
+    
+    public void save_server_state(ServerState state) {
+        
+	   try {
+           FileOutputStream fos = new FileOutputStream(Utilities.SERVER_BACKUP_DIR+"log");
+           ObjectOutputStream oos = new ObjectOutputStream(fos);
+           oos.writeObject(state);
+           oos.close();
+           fos.close();
+       } catch (IOException e) {
+           e.printStackTrace();
+       } 
     }
 
 

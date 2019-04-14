@@ -1,4 +1,5 @@
 #!/bin/bash
+if [ -d localdisk ]; then rm -rf localdisk; fi
 cd src
 javac server/*.java utilities/*.java testapp/*.java protocol/*.java channel/*.java state/*.java
 gnome-terminal --tab -t 'RMI' -- rmiregistry
