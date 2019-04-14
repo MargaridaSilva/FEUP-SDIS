@@ -29,7 +29,14 @@ class TestApp {
             case "BACKUP":{
                 String filename = args[2];
                 int replication = Integer.parseInt(args[3]);
-                testapp.backup(filename, replication);
+                testapp.backup(filename, replication, false);
+                break;
+            }
+            case "BACKUPENH":{
+                String filename = args[2];
+                System.out.println("BACKUPENH");
+                int replication = Integer.parseInt(args[3]);
+                testapp.backup(filename, replication, true);
                 break;
             }
             case "RESTORE":{
@@ -54,9 +61,9 @@ class TestApp {
     }
 
 
-    private void backup(String filename, int replication) {
+    private void backup(String filename, int replication, boolean enh) {
         try {
-            String response = this.stub.backup(filename, replication);
+            String response = this.stub.backup(filename, replication, enh);
             System.out.println("Backup: " + response);
         } catch (RemoteException e) {
             // TODO Auto-generated catch block

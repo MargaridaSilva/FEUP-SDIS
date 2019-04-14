@@ -36,6 +36,7 @@ public class ProtocolMessage {
 
     	this.sender_id = Integer.parseInt(args[2]);
     	this.file_id = args[3];
+    	this.version = args[1];
         this.type = getType(args[0]);
         this.chunk_num = Integer.parseInt(args[4]);
         this.replication = Integer.parseInt(args[5]);
@@ -107,6 +108,7 @@ public class ProtocolMessage {
     	String[] args = header.split(" ");
     	this.sender_id = Integer.parseInt(args[2]);
     	this.file_id = args[3];
+    	this.version = args[1];
         this.type = getType(args[0]);
         if (this.type != Type.DELETE) {
         	this.chunk_num = Integer.parseInt(args[4]);

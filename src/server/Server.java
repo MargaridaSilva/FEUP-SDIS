@@ -25,21 +25,21 @@ class Server implements Peer {
     Server(String protocol_ver, int server_id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr,
             int mdr_port)
             throws IOException {
-
-        FileSystem.init(server_id);
-        FileSystem.getInstance().createPeerFileStructure();
-
-        Channel mc = new Channel(mc_addr, mc_port);
+    	
+    	Channel mc = new Channel(mc_addr, mc_port);
         Channel mdb = new Channel(mdb_addr, mdb_port);
-        Channel mdr = new Channel(mdr_addr, mdr_port);
+        Channel mdr = new Channel(mdr_addr, mdr_port); 
 
-        ServerInfo.init(protocol_ver, server_id, mc, mdb, mdr);
+    	ServerInfo.init(protocol_ver, server_id, mc, mdb, mdr);
         this.server_info = ServerInfo.getInstance();
-        
+    	
+        FileSystem.init(server_id);
+        FileSystem.getInstance().handleServerStateBackup();
+        FileSystem.getInstance().createPeerFileStructure();
         
     	if (server_backup == null) {
     		server_backup = Executors.newSingleThreadExecutor();
-    		server_backup.execute(new ServerBackup(server_id));
+    		server_backup.execute(new ServerBackup());
     	}
     }
 
@@ -69,8 +69,8 @@ class Server implements Peer {
     }
 
     @Override   
-    public String backup(String filename, int replication) throws RemoteException {
-    	Executors.newSingleThreadExecutor().execute(new BackupInitiator(filename, replication));
+    public String backup(String filename, int replication, boolean enh) throws RemoteException {
+    	Executors.newSingleThreadExecutor().execute(new BackupInitiator(filename, replication, enh));
         return "OK";
     }
 

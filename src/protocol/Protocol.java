@@ -14,13 +14,13 @@ public class Protocol {
     private static final int STORED_MAX_DELAY_MS = 400;
     private static final int CHUNK_MAX_DELAY_MS = 400;
     private static final int PUTCHUNK_MAX_DELAY_MS = 400;
-
+    private static String version = "";
 
     private static ServerInfo server = ServerInfo.getInstance();
 
     public static void putchunk(ChunkId chunk_id, int replication, byte[] bytes, int readBytes) throws IOException {
 
-        ProtocolMessage message = new ProtocolMessage("PUTCHUNK", server.protocol_ver, server.server_id,
+        ProtocolMessage message = new ProtocolMessage("PUTCHUNK", version, server.server_id,
                 chunk_id.file_id, chunk_id.chunk_no, replication, bytes, readBytes);
 
         int tries = 0;
@@ -123,5 +123,10 @@ public class Protocol {
         if(perceived_replication < desired_replication){
             putchunk(chunk_id, replication, bytes, readBytes);
         }
+    }
+    public static void set_version(boolean enh) {
+    	if (enh)
+    		version = "2.0";
+    	else version = "1.0";
     }
 }

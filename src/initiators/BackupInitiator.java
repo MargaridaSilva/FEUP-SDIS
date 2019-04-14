@@ -12,10 +12,12 @@ public class BackupInitiator implements Runnable {
 
 	String filename;
 	int replication;
+	boolean enh;
 	
-	public BackupInitiator(String filename, int replication){
+	public BackupInitiator(String filename, int replication, boolean enh){
 		this.filename = filename;
 		this.replication = replication;
+		this.enh = enh;
 	}
 	
 	@Override
@@ -27,6 +29,7 @@ public class BackupInitiator implements Runnable {
             int readBytes = 0;
             byte[] bytes = new byte[Utilities.CHUNK_SIZE];
             int i = 0;
+            Protocol.set_version(this.enh);
 
             while ((readBytes = in_file.read(bytes, 0, Utilities.CHUNK_SIZE)) != -1) {
                 ChunkId chunk_id = new ChunkId(file_id, i);

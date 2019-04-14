@@ -58,8 +58,12 @@ public class MessageHandler implements Runnable {
 			ServerState.get_used_space() + message.body_len > ServerState.max_space){
 			return;
 		}
-
+		
 		ChunkId chunk_id =  new ChunkId(message.file_id, message.chunk_num);
+		
+		
+		if (ServerState.get_perceived_replication(chunk_id) > message.replication && Float.parseFloat(message.version) == 2) return;
+		
 		FileSystem.getInstance().save_chunk_backup(message.file_id, message.chunk_num, message.body, message.body_len);
 		ServerState.store_log(chunk_id, message.body_len, message.replication);
 		try {
