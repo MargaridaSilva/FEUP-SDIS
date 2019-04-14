@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 
+import protocol.LeaseManager;
 import server.ServerInfo;
 import state.ServerState;
 
@@ -47,12 +48,16 @@ public class FileSystem {
     	
     	if (Files.notExists(Paths.get(this.server_path))) {
     		try {
+    			System.out.println("CREATING");
                 Files.createDirectories(Paths.get(this.server_path));
                 Files.createDirectories(Paths.get(this.backup_path));
                 Files.createDirectories(Paths.get(this.restored_path));
             } catch (IOException e) {
                 e.printStackTrace();
             }
+    	}
+    	else {
+    		// para cada ficheiro, LeaseManager.make_lease(file_id);
     	}
         
     }
@@ -146,7 +151,10 @@ public class FileSystem {
     }
 
     public void save_chunk(String file_id, int chunk_no, byte[] bytes, int size, String path) {
+    	boolean new_file = !has_file(file_id);
+    	
         create_file_dir(file_id, path);
+        
 
         FileOutputStream fos;
         try {
@@ -157,6 +165,10 @@ public class FileSystem {
         } catch (IOException e) {
             e.printStackTrace();
         } 
+        
+        if (new_file)
+        	LeaseManager.make_lease(file_id);
+        
 	}
     
     public void delete_chunk(String file_id, int chunk_no) {
@@ -235,10 +247,9 @@ public class FileSystem {
     			e.printStackTrace();
     		}
     	}
-		
 	}
 	
-	public boolean hasFile(String file_id) {
+	public boolean has_file(String file_id) {
 		String backup_path = this.backup_path + file_id;
 		Path path = Paths.get(backup_path);
 		return Files.exists(path);

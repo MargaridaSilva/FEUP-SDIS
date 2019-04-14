@@ -66,7 +66,7 @@ public class MessageHandler implements Runnable {
 	}
 
 	private void handle_lease(ProtocolMessage message) {
-		if (FileSystem.getInstance().hasFile(message.file_id)) {
+		if (FileSystem.getInstance().has_file(message.file_id)) {
 			try {
 				Protocol.leased(message.file_id);
 			} catch (IOException e) {
