@@ -133,6 +133,15 @@ public class Protocol {
         server.mc.sendMessage(message);
     }
     
+	public static void lease(String file_id) throws IOException {
+		ProtocolMessage message = new ProtocolMessage("LEASE", "2.0", server.server_id, file_id, 0, 0, null, 0);
+		server.mc.sendMessage(message);
+	}
+	
+	public static void leased(String file_id) throws IOException {
+		ProtocolMessage message = new ProtocolMessage("LEASED", "2.0", server.server_id, file_id, 0, 0, null, 0);
+		server.mc.sendMessage(message);
+	}
 
     public static void putchunk_with_delay(ChunkId chunk_id, int replication, byte[] bytes, int readBytes) throws IOException {
         

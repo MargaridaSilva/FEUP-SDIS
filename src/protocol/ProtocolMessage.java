@@ -7,7 +7,7 @@ import java.util.Arrays;
 import utilities.Utilities;
 
 public class ProtocolMessage {
-    public static enum Type { PUTCHUNK, STORED, GETCHUNK, CHUNK, DELETE, REMOVED};
+    public static enum Type { PUTCHUNK, STORED, GETCHUNK, CHUNK, DELETE, REMOVED, LEASE, LEASED};
     private static final String FINAL_SEQ = "\r\n\r\n";
     
     public String file_id;
@@ -100,6 +100,10 @@ public class ProtocolMessage {
                 return Type.DELETE;
             case "REMOVED":
                 return Type.REMOVED;
+            case "LEASE":
+            	return Type.LEASE;
+            case "LEASED":
+            	return Type.LEASED;
            default:
                return null;
             }
