@@ -5,6 +5,7 @@ import utilities.Utilities;
 
 public class DeleteInitiator implements Runnable{
 	String filename;
+	String version = Utilities.STOCK_VERSION;
 	
 	public DeleteInitiator(String filename) {
 		this.filename = filename;
@@ -14,7 +15,7 @@ public class DeleteInitiator implements Runnable{
 	public void run() {
 		try{
             String file_id = Utilities.generateIdentifier(Utilities.FILES_DIR + filename);
-            Protocol.delete(file_id);
+            Protocol.delete(version, file_id);
 
         }catch(Exception e){
             e.printStackTrace();

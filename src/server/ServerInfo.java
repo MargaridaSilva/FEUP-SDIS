@@ -31,6 +31,10 @@ public class ServerInfo {
         this.mdb = mdb;
         this.mdr = mdr;
     }
+    
+    void set_protocol_ver(String version) {
+    	this.protocol_ver = version;
+    }
 
 }
 

@@ -123,8 +123,9 @@ public class Protocol {
         }
     }
 
-    public static void delete(String file_id) throws IOException {
-        ProtocolMessage message = new ProtocolMessage("DELETE", server.protocol_ver, server.server_id, file_id, 0, 0, null, 0);
+    public static void delete(String version, String file_id) throws IOException {
+    	server.protocol_ver = version;
+        ProtocolMessage message = new ProtocolMessage("DELETE", version, server.server_id, file_id, 0, 0, null, 0);
         server.mc.sendMessage(message);
     }
 

@@ -59,9 +59,11 @@ public class FileSystem {
             }
     	}
     	else {
-    		Set<String> set = ServerState.get_stored_files();
-    		for (String file_id:set) {
-    			LeaseManager.make_lease(file_id);
+    		if (ServerInfo.getInstance().protocol_ver.equals(Utilities.ENH_VERSION)) {
+	    		Set<String> set = ServerState.get_stored_files();
+	    		for (String file_id:set) {
+	    			LeaseManager.make_lease(file_id);
+	    		}
     		}
     		
     	}
@@ -172,7 +174,7 @@ public class FileSystem {
             e.printStackTrace();
         } 
         
-        if (new_file)
+        if (new_file && (ServerInfo.getInstance().protocol_ver.equals(Utilities.ENH_VERSION)))
         	LeaseManager.make_lease(file_id);
         
 	}

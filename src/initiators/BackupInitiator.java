@@ -34,10 +34,9 @@ public class BackupInitiator implements Runnable {
 
             while ((readBytes = in_file.read(bytes, 0, Utilities.CHUNK_SIZE)) != -1) {
                 ChunkId chunk_id = new ChunkId(file_id, i);
-                if (this.version == Utilities.ENH_VERSION && ServerState.get_perceived_replication(chunk_id) < replication) {
-                	Protocol.putchunk(version, chunk_id, replication, bytes, readBytes);
-        		}
-                
+                if (this.version.equals(Utilities.ENH_VERSION) && ServerState.get_perceived_replication(chunk_id) >= replication)
+                	continue;
+                Protocol.putchunk(version, chunk_id, replication, bytes, readBytes);
                 i++;
             }
 

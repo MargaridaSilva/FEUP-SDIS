@@ -48,7 +48,7 @@ class TestApp {
                 testapp.restore_enh(filename);
                 break;
             }
-            case "DELETE":{
+            case "DELETE": case "DELETEENH": {
                 String filename = args[2];
                 testapp.delete(filename);
                 break;
