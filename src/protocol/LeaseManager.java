@@ -10,7 +10,7 @@ import utilities.FileSystem;
 
 public class LeaseManager {
 	private static final ScheduledExecutorService nextLease = Executors.newScheduledThreadPool(10);
-	private static int LEASE_VALID_DUR = 60; //secs
+	private static int LEASE_VALID_DUR = 10; //secs
 	private static int LEASE_RENEWAL = 1; // secs
 	
 	

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,6 +48,16 @@ public class ServerState implements Externalizable{
         }
 
         servers_ack.add(server_id);
+    }
+    
+    public static Set<String> get_stored_files() {
+    	Set<String> set = new HashSet<String>();
+    	for(Map.Entry<ChunkId, ChunkInfo> entry : store_log.entrySet()) {
+    	    String file_id = entry.getKey().file_id;
+    	    set.add(file_id);
+    	}
+    	
+		return set;
     }
 
     public static void decrease_chunk_replication(ChunkId chunk_id, int server_id){

@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 import protocol.LeaseManager;
 import server.ServerInfo;
@@ -57,7 +59,11 @@ public class FileSystem {
             }
     	}
     	else {
-    		// para cada ficheiro, LeaseManager.make_lease(file_id);
+    		Set<String> set = ServerState.get_stored_files();
+    		for (String file_id:set) {
+    			LeaseManager.make_lease(file_id);
+    		}
+    		
     	}
         
     }
@@ -202,6 +208,8 @@ public class FileSystem {
         }
         
         ServerState.remove_file(file_id);
+        
+        System.out.println("DELETE FILE " + file_id);
     }
     
     public void save_server_state(ServerState state) {
