@@ -239,7 +239,7 @@ public class ServerState implements Externalizable{
     }
     
     public static void confirm_lease(String file_id) {
-    	if (!pending_leases.containsKey(file_id))
+    	if (pending_leases.containsKey(file_id))
     		pending_leases.put(file_id, true);
     }
     public static boolean is_leased(String file_id) {

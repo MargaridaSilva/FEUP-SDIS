@@ -58,7 +58,7 @@ public class MessageHandler implements Runnable {
 
 
 	private void handle_leased(ProtocolMessage message) {
-		if (message.sender_id == ServerInfo.getInstance().server_id) {
+		if (message.sender_id != ServerInfo.getInstance().server_id) {
 			ServerState.confirm_lease(message.file_id);
 		}
 			
