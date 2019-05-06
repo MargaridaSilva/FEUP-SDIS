@@ -1,5 +1,4 @@
 #!/bin/bash
 cd src
-rm server/*.class utilities/*.class testapp/*.class protocol/*.class channel/*.class state/*.class
-
-javac server/*.java utilities/*.java testapp/*.java protocol/*.java channel/*.java state/*.java
+rm channel/*.class initiators/*.class protocol/*.class server/*.class state/*.class testapp/*.class utilities/*.class
+javac channel/*.java initiators/*.java protocol/*.java server/*.java state/*.java testapp/*.java utilities/*.java

@@ -30,7 +30,7 @@ public class ProtocolMessage {
         this.body = Arrays.copyOfRange(buf, index + FINAL_SEQ.length(), this.buf_len);
         this.body_len = body.length;
         
-        byte[] header_bytes = Arrays.copyOfRange(buf, 0, index - 1);
+        byte[] header_bytes = Arrays.copyOfRange(buf, 0, index);
         String header = new String(header_bytes);
         String[] args = header.split(" ");
 

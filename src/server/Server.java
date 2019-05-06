@@ -124,23 +124,23 @@ class Server implements Peer {
         int server_id = Integer.parseInt(args[1]);
         String service_ap = args[2];
 
-        // String mc_addr = args[3];
-        // int mc_port = Integer.parseInt(args[4]);
+        String mc_addr = args[3];
+        int mc_port = Integer.parseInt(args[4]);
 
-        // String mdb_addr = args[5];
-        // int mdb_port = Integer.parseInt(args[6]);
+        String mdb_addr = args[5];
+        int mdb_port = Integer.parseInt(args[6]);
 
-        // String mdr_addr = args[7];
-        // int mdr_port = Integer.parseInt(args[8]);
+        String mdr_addr = args[7];
+        int mdr_port = Integer.parseInt(args[8]);
 
-        String mc_addr = Utilities.mc_addr;
-        int mc_port = Utilities.mc_port;
+        // String mc_addr = Utilities.mc_addr;
+        // int mc_port = Utilities.mc_port;
 
-        String mdb_addr = Utilities.mdb_addr;
-        int mdb_port = Utilities.mdb_port;
+        // String mdb_addr = Utilities.mdb_addr;
+        // int mdb_port = Utilities.mdb_port;
 
-        String mdr_addr = Utilities.mdr_addr;
-        int mdr_port = Utilities.mdr_port;
+        // String mdr_addr = Utilities.mdr_addr;
+        // int mdr_port = Utilities.mdr_port;
 
         try {
             Server server = new Server(protocol_ver, server_id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port);
